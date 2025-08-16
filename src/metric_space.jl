@@ -3,12 +3,12 @@
 push!(LOAD_PATH, pwd()*"/src/cg/")
 push!(LOAD_PATH, pwd()*"/src/" )
 
-using FrechetDist;
-using FrechetDist.cg;
-using FrechetDist.cg.polygon;
-using FrechetDist.cg.point;
-using Graphs;
-using Distances;
+using FrechetDist
+using FrechetDist.cg
+using FrechetDist.cg.polygon
+using FrechetDist.cg.point
+using Graphs
+using Distances
 
 
 abstract type AbstractFMetricSpace end
@@ -65,6 +65,44 @@ function Base.size(P::MPointsSpace{PType} ) where {PType}
     return  size( P.m, 2 );
 end
 
+####################################################################
+# PermutMetric: A permutation of a finite metric space.
+####################################################################
+struct PermutMetric{MetricType} <: AbstractFMetricSpace
+    n::Int  # Number of points
+    m::MetricType;
+    I::Vector{Int64};
+end
+
+function  PermutMetric(_m::MetricType ) where {MetricType}
+    _n = size( _m );
+    return PermutMetric( _n, _m, [i for i ∈ 1:_n] );
+end
+
+function  PermutMetric(_m::MetricType, _I::Vector{Int64} ) where {MetricType}
+    return PermutMetric{MetricType}( size( _m ), _m, _I );
+end
+
+
+function metric( P::PermutMetric{MetricType}, x, y ) where {MetricType}
+    if  ( x == y )
+        return  0.0;
+    end
+    return  metric( P.m, P.I[ x ], P.I[ y ] );
+end
+
+function Base.size(P::PermutMetric{MetricSpace} ) where {MetricSpace}
+    return  P.n;
+end
+
+function swap!( P::PermutMetric{MetricType}, x, y ) where {MetricType}
+    if  x == y then
+        return;
+    end
+    I[ x ], I[ y ] = I[ y ], I[ x ]
+end
+
+######################################################################
 
 function  update_distances( M::AbstractFMetricSpace, I, D, pos, n )
     x = I[ pos ];
@@ -172,6 +210,19 @@ function read_fvecs(filename::String)
     end
 end
 
+###################################################################
+
+#mutable struct NNGraph{FMS} where {FMS <: AbstractFMetricSpace}
+mutable struct NNGraph{FMS <: AbstractFMetricSpace}
+    n::Int64
+    m::FMS
+    G::DiGraph
+end
+
+function  NNGraph( _m::FMS ) where{FMS}
+    _n = size( _m );
+    return NNGraph{FMS}( _n, _m, DiGraph( _n ) );
+end        
 
 function  (@main)(args)
 
@@ -185,9 +236,16 @@ function  (@main)(args)
         PS = MPointsSpace( m );
         I, D = greedy_permutation_naive( PS )
 
+        println( "I  (type): ", typeof( I ) )
+        println( "PS (type): ", typeof( PS ) )
+        m = PermutMetric( PS, I );
+        G = NNGraph( m );
+        
+        #=
         for i ∈ 1:n
             println( i, ":", I[i], "  D: ", D[i ] );
         end
+        =#
         
         exit
     end
@@ -202,10 +260,14 @@ function  (@main)(args)
     PS = PointsSpace( Points( P ) );
     I, D = greedy_permutation_naive( PS )
 
+    println( typeof( I ) )
+    println( typeof( D ) )
+    #=
     for i ∈ 1:n
         println( i, ":", I[i], "  D: ", D[i ] );
     end
-
+    =#
+    
     return  0;
 end
 
