@@ -9,7 +9,7 @@ using FrechetDist.cg.polygon
 using FrechetDist.cg.point
 using Graphs
 using Distances
-
+using DataStructures
 
 abstract type AbstractFMetricSpace end
 """
@@ -210,6 +210,7 @@ function read_fvecs(filename::String)
     end
 end
 
+
 ###################################################################
 
 #mutable struct NNGraph{FMS} where {FMS <: AbstractFMetricSpace}
@@ -223,6 +224,123 @@ function  NNGraph( _m::FMS ) where{FMS}
     _n = size( _m );
     return NNGraph{FMS}( _n, _m, DiGraph( _n ) );
 end        
+
+"""
+    nng_random_dag(_G::NNGraph{FMS}, d::Int64 = 10) where {FMS}
+
+Generates a random directed acyclic graph (DAG) for the given nearest neighbor graph (`NNGraph`).
+
+# Arguments
+- `_G::NNGraph{FMS}`: The nearest neighbor graph object, where `FMS` is a finite metric space.
+- `d::Int64`: The maximum number of outgoing edges (degree) for each vertex. Defaults to `10`.
+
+# Behavior
+- For each vertex `i` in the graph, the function randomly selects up to `d` vertices from the set of vertices with indices greater than `i` (to ensure the graph remains acyclic).
+- The selected vertices are added as outgoing edges from vertex `i`.
+- Duplicate edges are removed using `unique!`.
+"""
+function nng_random_dag( _G::NNGraph{FMS}, d::Int64 = 10 ) where {FMS}
+    G = _G.G;
+    n = _G.n;
+    for  i ∈ 1:(n-1)
+        dst = rand( (i+1):n, d );
+        unique!( dst );
+        for j ∈ dst
+            add_edge!( G, i, j )
+        end
+    end
+end
+
+function find_k_lowest_f(G::DiGraph, u::Int, k::Int, f )
+    
+    # Use a PriorityQueue to store vertices to visit, prioritized by their f value.
+    # The lowest f value has the highest priority.
+    pq     = PriorityQueue{Int, Float64}()
+    result = PriorityQueue{Int, Float64}(Base.Reverse)
+    enqueue!(pq, u, f( u ) )
+
+    # A set to keep track of visited vertices to avoid cycles and redundant processing.
+    visited = Set{Int}()
+    push!(visited, u)
+    #println( "f(u) = ", f(u ) )
+    #println( typeof( f(u) ) );
+    
+    enqueue!( result, u, f( u ) );
+    #visited = Set{Int}()
+    #push!( queued, u)
+    cost::Int = 0;
+    # Loop until the PriorityQueue is empty or we have found k vertices.
+    while !isempty(pq)
+        # Dequeue the vertex with the current lowest f value.
+        #println( "before dequeue!" );
+        v, v_val = peek( pq );
+        dequeue!(pq)
+        cost += 1;
+        #println( "cost: ", cost );
+
+        ℓ = length( pq )
+        if  ( ℓ >= k )
+            while  ( length( result ) > k )
+                dequeue!( result );
+            end
+            r, r_val = peek( result )
+
+            # Maybe too aggressive?
+            if  ( v_val > r_val )
+                break;
+            end
+        end
+
+        # Put it into the results...
+        result[ v ] = v_val;
+
+        N = outneighbors(G, v)
+
+        for  o ∈ N
+            cost += 1;
+            if  ( o ∈ visited )
+                continue
+            end
+            o_val = f( o );
+            enqueue!( pq, o, o_val );
+            push!( visited, o );
+        end
+    end
+
+    #println( "Done?" );
+    cl = collect( result );
+    #println( "MSHOGI: ", typeof( cl ) );
+    rs = [cl[i]  for i ∈ length(cl):-1:1]
+    #   reverse( cl );
+    #=
+    println( "cl: " );
+    println( cl );
+    println( "rs: " );
+    println( rs );
+    println( " SHOGI" );
+    exit( -1 );
+    =#
+    return   rs, cost
+end
+
+function nng_greedy_dag( _G::NNGraph{FMS}, 
+                         R::Vector{Float64},
+                         factor::Float64 = 1.1 
+                        ) where {FMS}
+    G = _G.G;
+    n = _G.n;
+    @assert( length( R ) == n, "R must have the same length ." );
+    for i ∈ 2:n
+        result, _ = find_k_lowest_f( G, i, 20, j -> metric( _G.m, i, j) );
+        for  (u, dist) ∈ result
+            if  ( dist < factor * R[ i ] )
+                add_edge!( G, u, i );
+            end
+        end
+    end
+
+end                        
+
 
 function  (@main)(args)
 
@@ -239,8 +357,13 @@ function  (@main)(args)
         println( "I  (type): ", typeof( I ) )
         println( "PS (type): ", typeof( PS ) )
         m = PermutMetric( PS, I );
-        G = NNGraph( m );
-        
+        GA = NNGraph( m );
+        GB = NNGraph( m );
+        nng_random_dag( GA, 10 );
+
+        nng_greedy_dag( GB, D, 2.1 )
+        println( "# edges random(10) : ", ne(GA.G) );
+        println( "# edges greedy     : ", ne(GB.G) );
         #=
         for i ∈ 1:n
             println( i, ":", I[i], "  D: ", D[i ] );
