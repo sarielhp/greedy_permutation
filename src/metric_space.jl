@@ -32,11 +32,15 @@ struct PointsSpace{PType} <: AbstractFMetricSpace
     P::Vector{PType}
 end
 
-function metric( P::PointsSpace{PType}, x, y ) where {PType}
+function dist( P::PointsSpace{PType}, x, y ) where {PType}
     if  ( x == y )
         return  0.0;
     end
     return  Dist( P.P[ x ], P.P[ y ] );
+end
+
+function dist_real( P::PointsSpace{PType}, x, y_real ) where {PType}
+    return  Dist( P.P[ x ], y_real );
 end
 
 function Base.size(P::PointsSpace{PType} ) where {PType}
@@ -54,11 +58,15 @@ struct MPointsSpace{PType} <: AbstractFMetricSpace
 end
 
 
-function metric( P::MPointsSpace{PType}, x, y ) where {PType}
+function dist( P::MPointsSpace{PType}, x, y ) where {PType}
     if  ( x == y )
         return  0.0;
     end
     return  euclidean( P.m[ :, x ], P.m[ :, y ] );
+end
+
+function dist_real( P::MPointsSpace{PType}, x, y_real ) where {PType}
+    return  euclidean( P.m[ :, x ], y_real );
 end
 
 function Base.size(P::MPointsSpace{PType} ) where {PType}
@@ -84,11 +92,18 @@ function  PermutMetric(_m::MetricType, _I::Vector{Int64} ) where {MetricType}
 end
 
 
-function metric( P::PermutMetric{MetricType}, x, y ) where {MetricType}
+function dist( P::PermutMetric{MetricType}, x, y ) where {MetricType}
     if  ( x == y )
         return  0.0;
     end
-    return  metric( P.m, P.I[ x ], P.I[ y ] );
+    return  dist( P.m, P.I[ x ], P.I[ y ] );
+end
+
+function dist_real( P::PermutMetric{MetricType}, x, y_real ) where {MetricType}
+    if  ( x == y )
+        return  0.0;
+    end
+    return  dist( P.m, P.I[ x ], y_real );
 end
 
 function Base.size(P::PermutMetric{MetricSpace} ) where {MetricSpace}
@@ -108,7 +123,7 @@ function  update_distances( M::AbstractFMetricSpace, I, D, pos, n )
     x = I[ pos ];
     for  i ∈ pos+1:n
         y = I[ i ];
-        d = metric( M, x, y )
+        d = dist( M, x, y )
         #println( "d: ", d, "  x: ", x, "  y: ", y, "  pos: ", pos, "  i: ", i );
         if   ( ( d < D[ i ] )  ||  ( D[ i ] < zero(Float64) ) )
             D[ i ] = d;
@@ -117,10 +132,10 @@ function  update_distances( M::AbstractFMetricSpace, I, D, pos, n )
 end
 
 
-function  greedy_permutation_naive( M::AbstractFMetricSpace )
-    n = size( M );
+function  greedy_permutation_naive( M::AbstractFMetricSpace, n::Int64 )
+    #n = size( M );
     println( "m: ", n );
-    I = [i for i ∈ 1:n ];
+    I = [i for i ∈ 1:size(M) ];   ## Imprtant: n might be smaller than size(M)
     D = fill( Float64(-1.0), n );
 
     # Initialize
@@ -220,8 +235,8 @@ mutable struct NNGraph{FMS <: AbstractFMetricSpace}
     G::DiGraph
 end
 
-function  NNGraph( _m::FMS ) where{FMS}
-    _n = size( _m );
+function  NNGraph( _m::FMS, _n::Int64 ) where{FMS}
+#    _n = size( _m );
     return NNGraph{FMS}( _n, _m, DiGraph( _n ) );
 end        
 
@@ -239,9 +254,8 @@ Generates a random directed acyclic graph (DAG) for the given nearest neighbor g
 - The selected vertices are added as outgoing edges from vertex `i`.
 - Duplicate edges are removed using `unique!`.
 """
-function nng_random_dag( _G::NNGraph{FMS}, d::Int64 = 10 ) where {FMS}
+function nng_random_dag( _G::NNGraph{FMS}, n::Int64, d::Int64 = 10 ) where {FMS}
     G = _G.G;
-    n = _G.n;
     for  i ∈ 1:(n-1)
         dst = rand( (i+1):n, d );
         unique!( dst );
@@ -278,7 +292,7 @@ function find_k_lowest_f(G::DiGraph, u::Int, k::Int, f )
         cost += 1;
         #println( "cost: ", cost );
 
-        ℓ = length( pq )
+        ℓ = length( result )
         if  ( ℓ >= k )
             while  ( length( result ) > k )
                 dequeue!( result );
@@ -325,13 +339,14 @@ end
 
 function nng_greedy_dag( _G::NNGraph{FMS}, 
                          R::Vector{Float64},
+                         n::Int64,
                          factor::Float64 = 1.1 
                         ) where {FMS}
     G = _G.G;
-    n = _G.n;
+    #n = _G.n;
     @assert( length( R ) == n, "R must have the same length ." );
     for i ∈ 2:n
-        result, _ = find_k_lowest_f( G, i, 20, j -> metric( _G.m, i, j) );
+        result, _ = find_k_lowest_f( G, 1, 20, j -> dist( _G.m, i, j) );
         for  (u, dist) ∈ result
             if  ( dist < factor * R[ i ] )
                 add_edge!( G, u, i );
@@ -341,29 +356,52 @@ function nng_greedy_dag( _G::NNGraph{FMS},
 
 end                        
 
+function  nng_nearest_neighbor( _G::NNGraph{FMS}, 
+                                 q_real
+                                ) where {FMS}
+    G = _G.G;
+    n = _G.n;
+    result, cost = find_k_lowest_f( G, 1, 20, j -> dist_real( _G.m, j, q_real) );
+    u, dist = result[ 1 ];
+    
+    println( "u: ", u, "   dist : ", dist, cost );
+end
+
 
 function  (@main)(args)
 
-    if  ( length( args ) > 0 )
-        m = read_fvecs( args[ 1 ] );
-        d::Int64 = size( m, 1 );
-        n::Int64 = size( m, 2 );
+    if  ( length( args ) == 2 )
+        m_i = read_fvecs( args[ 1 ] );
+        m_q = read_fvecs( args[ 2 ] );
+        d::Int64 = size( m_i, 1 );
+        n::Int64 = size( m_i, 2 );
+        n_q::Int64 = size( m_q, 2 );
         println( "Dimension: ", d );
         println( "n        : ", n );
+        println( "n_q      : ", n_q );
         
-        PS = MPointsSpace( m );
-        I, D = greedy_permutation_naive( PS )
+        #m=hcat( m_i, m_q );
 
-        println( "I  (type): ", typeof( I ) )
-        println( "PS (type): ", typeof( PS ) )
+        PS = MPointsSpace( m_i );
+        I, D = greedy_permutation_naive( PS, n )
+
+        #println( "I  (type): ", typeof( I ) )
+        #println( "PS (type): ", typeof( PS ) )
         m = PermutMetric( PS, I );
-        GA = NNGraph( m );
-        GB = NNGraph( m );
-        nng_random_dag( GA, 10 );
+        G_rand = NNGraph( m, n );
+        GB = NNGraph( m, n );
+        nng_random_dag( G_rand, n, 10 );
 
-        nng_greedy_dag( GB, D, 2.1 )
-        println( "# edges random(10) : ", ne(GA.G) );
+        nng_greedy_dag( GB, D, n, 2.1 )
+        println( "# edges random(10) : ", ne(G_rand.G) );
         println( "# edges greedy     : ", ne(GB.G) );
+
+        QS = MPointsSpace( m_q );
+        for i ∈ 1:n_q
+            println( "Query ", i, ": " );
+            nng_nearest_neighbor( G_rand, QS.m[ :, i ] );
+            nng_nearest_neighbor( GB, QS.m[ :, i ] );
+        end
         #=
         for i ∈ 1:n
             println( i, ":", I[i], "  D: ", D[i ] );
@@ -381,7 +419,7 @@ function  (@main)(args)
 
     println( "Hello world!" );
     PS = PointsSpace( Points( P ) );
-    I, D = greedy_permutation_naive( PS )
+    I, D = greedy_permutation_naive( PS, n )
 
     println( typeof( I ) )
     println( typeof( D ) )
