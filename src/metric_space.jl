@@ -283,12 +283,19 @@ end
 function find_k_lowest_f(G::DiGraph, u::Int, k::Int, f )
     @assert( k > 0 );
     
+    cost::Int = 0;
+
+    @inline function  eval_f( z )
+        cost += 1
+        return f( z );
+    end
+    
     #println( "find_k_lowest_f" );
     # Use a PriorityQueue to store vertices to visit, prioritized by their f value.
     # The lowest f value has the highest priority.
     pq     = PriorityQueue{Int, Float64}()
     result = PriorityQueue{Int, Float64}(Base.Reverse)
-    u_val = f( u );
+    u_val = eval_f( u );
 
     enqueue!( pq, u, u_val )
     enqueue!( result, u, u_val );
@@ -299,7 +306,6 @@ function find_k_lowest_f(G::DiGraph, u::Int, k::Int, f )
     visited = Set{Int}()
     push!(visited, u)
     
-    cost::Int = 0;
     f_threshold = false;
     threshold = -10.0;
 
@@ -309,7 +315,6 @@ function find_k_lowest_f(G::DiGraph, u::Int, k::Int, f )
         #println( "before dequeue!" );
         v, v_val = peek( pq );
         dequeue!(pq)
-        cost += 1;
 
         ℓ = length( result )
         if  ( ℓ >= k )
@@ -331,14 +336,13 @@ function find_k_lowest_f(G::DiGraph, u::Int, k::Int, f )
         N = outneighbors(G, v)
 
         for  o ∈ N
-            cost += 1;
             if  ( o ∈ visited )
                 continue
             end
 
             push!( visited, o );
 
-            o_val = f( o );
+            o_val = eval_f( o );
             # @assert( o_val > 0.0 );
             if  ( f_threshold   &&  ( threshold < o_val ) )
                 continue
@@ -363,29 +367,60 @@ function find_k_lowest_f_greedy(G::DiGraph, u::Int, k::Int, f )
     # The lowest f value has the highest priority.
     pq     = PriorityQueue{Int, Float64}()
     result = PriorityQueue{Int, Float64}(Base.Reverse)
-    u_val = f( u );
+    leftover = Vector{Int}()
+    visited = Set{Int}()
+    cost::Int = 0  # The number of times f was called...
+    f_threshold = false;
+    threshold = -10.0;
+
+    @inline function  eval_f( y )
+        cost += 1
+        return  f( y )
+    end
+        
+    function  leftover_to_queue()
+        while  !isempty( leftover )
+            z = pop!( leftover );
+            if  ( z ∈ visited )
+                continue
+            end
+            push!( visited, z );
+            @assert( z ∈ visited )
+            z_val = eval_f( z )
+            if  ( f_threshold   &&  ( threshold < z_val ) )
+                continue
+            end
+
+            enqueue!( pq, z, z_val );
+            enqueue!( result, z, z_val );
+        end
+    end
+
+    u_val = eval_f( u )
     δ = 0.7
-    
+
     enqueue!( pq, u, u_val )
-    enqueue!( result, u, u_val );
+    enqueue!( result, u, u_val )
     curr = u_val;
     
     # A set to keep track of visited vertices to avoid cycles and
     # redundant processing.
-    visited = Set{Int}()
     push!(visited, u)
     
-    cost::Int = 0;
-    f_threshold = false;
-    threshold = -10.0;
 
     # Loop until the PriorityQueue is empty or we have found k vertices.
-    while !isempty(pq)
+    while ( ( !isempty(pq) )  ||  ( !isempty( leftover ) ) )
+        if isempty( pq )
+            leftover_to_queue()
+            if  isempty( pq )
+                break
+            end
+        end
+        
         # Dequeue the vertex with the current lowest f value.
         #println( "before dequeue!" );
         v, v_val = peek( pq );
         dequeue!(pq)
-        cost += 1;
 
         if  v_val < curr
             curr = v_val;
@@ -410,15 +445,19 @@ function find_k_lowest_f_greedy(G::DiGraph, u::Int, k::Int, f )
 
         N = outneighbors(G, v)
 
+        f_copy = false
         for  o ∈ N
-            cost += 1;
+            if  f_copy
+                push!( leftover, o )
+                continue
+            end
             if  ( o ∈ visited )
                 continue
             end
 
             push!( visited, o );
 
-            o_val = f( o );
+            o_val = eval_f( o );
             # @assert( o_val > 0.0 );
             if  ( f_threshold   &&  ( threshold < o_val ) )
                 continue
@@ -429,9 +468,8 @@ function find_k_lowest_f_greedy(G::DiGraph, u::Int, k::Int, f )
 
             # Greedily jump if the improvement is significant...
             if  ( o_val < δ * curr )
-                # Somewhat strangely, we need to re-push the current vertex.
-                enqueue!( pq, v, v_val )
-                break;
+                f_copy = true;
+                curr = o_val
             end
         end
     end
@@ -549,12 +587,11 @@ function  nng_nn_search_print( _G::NNGraphFMS,
     #println( result );
     _,dist_g = result_g[1];
     u, dist = result[ 1 ];
-    if  ( dist != ℓ )
-        @printf( "[k: %5d] cost: %7d/%7g   d: %12g/%12g\n", k, cost, cost_g,
-            dist, dist_g  )
-    else
-        @printf( "[k: %5d] cost: %7d   d: EXACT\n", k, cost  )
-    end
+    s_dist = ( dist == ℓ ) ? "Exact" : @sprintf( "%12g", dist );
+    s_dist_g = ( dist_g == ℓ ) ? "Exact" : @sprintf( "%12g", dist_g );
+        
+    @printf( "[k: %5d] cost: %7d/%7g   d: %s/%s\n", k, cost, cost_g,
+        s_dist, s_dist_g  )
     return result[ 1 ];
 end
 
@@ -737,11 +774,15 @@ function  robust_prune( G::NNGraphFMS, p, V::Set{Int},
                            α, max_size ) where {NNGraphFMS}
     pq     = PriorityQueue{Int, Float64}()
 
-    N = union( Set{Int}( outneighbors(G, p) ), V );
+    N = deepcopy( V ); #union( Set{Int}( ), V );
+    for x ∈ outneighbors(G.G, p)
+        push!( N, x )
+    end
+        
     delete!( N, p );
     
     for  o ∈ N
-        push!( pq, o, dist( G.m, p, o ) )
+        enqueue!( pq, o, dist( G.m, p, o ) )
     end
 
     out = Set{Int}();
@@ -771,7 +812,8 @@ function  robust_prune_vertex!( G::NNGraphFMS, p, V::Set{Int},
                            α, max_size ) where {NNGraphFMS}
     out =  robust_prune( G, p, V, α, max_size );
 
-    neighbors_to_delete = Set{Int}( collect(outneighbors(g, p)) );
+    
+    neighbors_to_delete = Set{Int}( collect( outneighbors(G.G, p) ) )
     del_list = setdiff( neighbors_to_delete, out );
     add_list = setdiff( out, neighbors_to_delete );
     
@@ -818,12 +860,12 @@ end
 
 function  disk_ann_clean( G, α, L, max_degree )
     n = size( G.m )
+    π = randperm(n)
     for i ∈ 1:n
-        π = randperm(n)
         result, V = nng_nn_search_all( G, π[ i ], L );
         out = robust_prune( G, π[ i ], V, α, max_degree );
         for j ∈ out
-            if  ( outdegree( G.G, π[ i ] ) >= R )
+            if  ( outdegree( G.G, π[ i ] ) >= max_degree )
                 U = Set{Int}( outneighbors( G.G, j ) )
                 push!( U, π[ i ] );
                 robust_prune_vertex!( G, j, U, α, max_degree );
@@ -838,22 +880,12 @@ end
 
 function  disk_ann_build_graph( m, α, L, max_degree )
     n = size( m )
-    _G = generate_directed_random_graph( n, R )
+    _G = generate_directed_random_graph( n, 2*max_degree )
     G = NNGraph( n, m, _G, "disk_ann" );
-    for i ∈ 1:n
-        π = randperm(n)
-        result, V = nng_nn_search_all( G, π[ i ], L );
-        out = robust_prune( G, π[ i ], V, α, max_degree );
-        for j ∈ out
-            if  ( outdegree( G.G, π[ i ] ) >= R )
-                U = Set{Int}( outneighbors( G.G, j ) )
-                push!( U, π[ i ] );
-                robust_prune_vertex!( G, j, U, α, max_degree );
-            else
-                add_edge!( G.G, j, π[ i ] );
-            end
-        end
-    end
+    L = 20;
+    
+    disk_ann_clean( G, α, L, max_degree )
+    disk_ann_clean( G, α, L, max_degree )
     
     return  G
 end
@@ -902,16 +934,33 @@ function  test_nn_queries( m_i, m_q )
 
 
     m_inc = PermutMetric(  MPointsSpace( m_i ) );
-    
+
+    println( "Incremental graph construction (1.3)" );
     @time G_inc_1_3, _ = nng_build_and_permut!( m_inc, 1.3 );
     description!( G_inc_1_3, "Inc nn 1.3" );
+
+    α = 1.4
+    L = 40
+    max_degree = 5;
+
+    println( "Incremental graph construction (1.6)" );
+    @time G_inc_1_6, _ = nng_build_and_permut!( m_inc, 1.6 );
+    description!( G_inc_1_6, "Inc nn 1.6" );
+    disk_ann_clean( G_inc_1_6, α, L, max_degree )
+
+    G_disk_ann = disk_ann_build_graph( MPointsSpace( m_i ), α, L, max_degree )
+    description!( G_disk_ann, "DiskAnn( α = " * string( α ) * ", L = " * string( L )
+                * "maxd: " * string(max_degree) );
     
     QS = MPointsSpace( m_q );
-
-    Graphs = [G_rand, G_1_1, G_1_2, G_2, G_inc_1_3 ];
+    
+    Graphs = [G_rand, G_1_1, G_1_2, G_2,
+              G_inc_1_3, G_inc_1_6,
+              G_disk_ann ];
     println( typeof( Graphs ) );
     lens = [1,2,4,8,16,20, 40, 80, 160, 320, 1000 ];
     
+    println( "Query testing starting..." );
     for i ∈ 1:n_q
         ℓ = nn_search_brute_force( m_i, m_q[ :, i] )
         println( "Query ", i, " (", ℓ, "):" );
@@ -924,7 +973,6 @@ function  test_nn_queries( m_i, m_q )
             
             println( "" );
         end
-        
     end
 
     println( "\nn: ", n );
@@ -940,7 +988,7 @@ end
 
 
 function  (@main)(args)
-    #m_i, m_q = input_random( 10000, 10000, 2 )
+    #m_i, m_q = input_random( 100, 10, 2 )
     #m_i, m_q = input_random( 1000, 1000, 8 )
     m_i, m_q = input_sift_small()# # 10000, 1000, 8 );
     test_nn_queries( m_i, m_q )
