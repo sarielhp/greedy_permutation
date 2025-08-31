@@ -10,6 +10,12 @@ using FrechetDist.cg.point
 using Graphs
 using Distances
 using DataStructures
+using Printf
+using Random
+
+using PlotGraphviz
+
+using SimpleWeightedGraphs
 
 abstract type AbstractFMetricSpace end
 """
@@ -92,7 +98,7 @@ function  PermutMetric(_m::MetricType, _I::Vector{Int64} ) where {MetricType}
 end
 
 
-function dist( P::PermutMetric{MetricType}, x, y ) where {MetricType}
+function dist( P::PermutMetric{MetricType}, x::Int, y::Int ) where {MetricType}
     if  ( x == y )
         return  0.0;
     end
@@ -100,10 +106,7 @@ function dist( P::PermutMetric{MetricType}, x, y ) where {MetricType}
 end
 
 function dist_real( P::PermutMetric{MetricType}, x, y_real ) where {MetricType}
-    if  ( x == y )
-        return  0.0;
-    end
-    return  dist( P.m, P.I[ x ], y_real );
+    return  dist_real( P.m, P.I[ x ], y_real );
 end
 
 function Base.size(P::PermutMetric{MetricSpace} ) where {MetricSpace}
@@ -111,10 +114,10 @@ function Base.size(P::PermutMetric{MetricSpace} ) where {MetricSpace}
 end
 
 function swap!( P::PermutMetric{MetricType}, x, y ) where {MetricType}
-    if  x == y then
+    if  x == y
         return;
     end
-    I[ x ], I[ y ] = I[ y ], I[ x ]
+    P.I[ x ], P.I[ y ] = P.I[ y ], P.I[ x ]
 end
 
 ######################################################################
@@ -233,15 +236,20 @@ mutable struct NNGraph{FMS <: AbstractFMetricSpace}
     n::Int64
     m::FMS
     G::DiGraph
+    desc::String
 end
 
 function  NNGraph( _m::FMS, _n::Int64 ) where{FMS}
 #    _n = size( _m );
-    return NNGraph{FMS}( _n, _m, DiGraph( _n ) );
+    return NNGraph{FMS}( _n, _m, DiGraph( _n ), "" );
 end        
 
+function  description!( G::NNGraphF, _desc::String ) where {NNGraphF}
+    G.desc = _desc;
+end
+
 """
-    nng_random_dag(_G::NNGraph{FMS}, d::Int64 = 10) where {FMS}
+    nng_random_dag!(_G::NNGraph{FMS}, d::Int64 = 10) where {FMS}
 
 Generates a random directed acyclic graph (DAG) for the given nearest neighbor graph (`NNGraph`).
 
@@ -254,7 +262,7 @@ Generates a random directed acyclic graph (DAG) for the given nearest neighbor g
 - The selected vertices are added as outgoing edges from vertex `i`.
 - Duplicate edges are removed using `unique!`.
 """
-function nng_random_dag( _G::NNGraph{FMS}, n::Int64, d::Int64 = 10 ) where {FMS}
+function nng_random_dag!( _G::NNGraph{FMS}, n::Int64, d::Int64 = 10 ) where {FMS}
     G = _G.G;
     for  i ∈ 1:(n-1)
         dst = rand( (i+1):n, d );
@@ -265,24 +273,36 @@ function nng_random_dag( _G::NNGraph{FMS}, n::Int64, d::Int64 = 10 ) where {FMS}
     end
 end
 
+function nng_random_dag( m::FMS, degree::Int64 ) where {FMS}
+    G_rand = NNGraph( m, size( m ) );
+    nng_random_dag!( G_rand, size( m ), degree )
+    return  G_rand
+end
+
+
 function find_k_lowest_f(G::DiGraph, u::Int, k::Int, f )
+    @assert( k > 0 );
     
+    #println( "find_k_lowest_f" );
     # Use a PriorityQueue to store vertices to visit, prioritized by their f value.
     # The lowest f value has the highest priority.
     pq     = PriorityQueue{Int, Float64}()
     result = PriorityQueue{Int, Float64}(Base.Reverse)
-    enqueue!(pq, u, f( u ) )
+    u_val = f( u );
 
+    enqueue!( pq, u, u_val )
+    enqueue!( result, u, u_val );
+    
+    #println( "u_val: ", u_val );
+    
     # A set to keep track of visited vertices to avoid cycles and redundant processing.
     visited = Set{Int}()
     push!(visited, u)
-    #println( "f(u) = ", f(u ) )
-    #println( typeof( f(u) ) );
     
-    enqueue!( result, u, f( u ) );
-    #visited = Set{Int}()
-    #push!( queued, u)
     cost::Int = 0;
+    f_threshold = false;
+    threshold = -10.0;
+
     # Loop until the PriorityQueue is empty or we have found k vertices.
     while !isempty(pq)
         # Dequeue the vertex with the current lowest f value.
@@ -290,17 +310,17 @@ function find_k_lowest_f(G::DiGraph, u::Int, k::Int, f )
         v, v_val = peek( pq );
         dequeue!(pq)
         cost += 1;
-        #println( "cost: ", cost );
 
         ℓ = length( result )
         if  ( ℓ >= k )
+            f_threshold = true;
             while  ( length( result ) > k )
                 dequeue!( result );
             end
-            r, r_val = peek( result )
-
+            _, threshold = peek( result )
+            #println( "threshold: ", threshold );
             # Maybe too aggressive?
-            if  ( v_val > r_val )
+            if  ( v_val > threshold )
                 break;
             end
         end
@@ -315,120 +335,616 @@ function find_k_lowest_f(G::DiGraph, u::Int, k::Int, f )
             if  ( o ∈ visited )
                 continue
             end
-            o_val = f( o );
-            enqueue!( pq, o, o_val );
+
             push!( visited, o );
+
+            o_val = f( o );
+            # @assert( o_val > 0.0 );
+            if  ( f_threshold   &&  ( threshold < o_val ) )
+                continue
+            end
+            
+            enqueue!( pq, o, o_val );
+            enqueue!( result, o, o_val );
         end
     end
 
-    #println( "Done?" );
     cl = collect( result );
-    #println( "MSHOGI: ", typeof( cl ) );
     rs = [cl[i]  for i ∈ length(cl):-1:1]
-    #   reverse( cl );
-    #=
-    println( "cl: " );
-    println( cl );
-    println( "rs: " );
-    println( rs );
-    println( " SHOGI" );
-    exit( -1 );
-    =#
-    return   rs, cost
+
+    return   rs, cost, visited
 end
 
-function nng_greedy_dag( _G::NNGraph{FMS}, 
-                         R::Vector{Float64},
-                         n::Int64,
-                         factor::Float64 = 1.1 
-                        ) where {FMS}
-    G = _G.G;
-    #n = _G.n;
-    @assert( length( R ) == n, "R must have the same length ." );
-    for i ∈ 2:n
-        result, _ = find_k_lowest_f( G, 1, 20, j -> dist( _G.m, i, j) );
-        for  (u, dist) ∈ result
-            if  ( dist < factor * R[ i ] )
-                add_edge!( G, u, i );
+
+function find_k_lowest_f_greedy(G::DiGraph, u::Int, k::Int, f )
+    @assert( k > 0 );
+    
+    # Use a PriorityQueue to store vertices to visit, prioritized by their f value.
+    # The lowest f value has the highest priority.
+    pq     = PriorityQueue{Int, Float64}()
+    result = PriorityQueue{Int, Float64}(Base.Reverse)
+    u_val = f( u );
+    δ = 0.7
+    
+    enqueue!( pq, u, u_val )
+    enqueue!( result, u, u_val );
+    curr = u_val;
+    
+    # A set to keep track of visited vertices to avoid cycles and
+    # redundant processing.
+    visited = Set{Int}()
+    push!(visited, u)
+    
+    cost::Int = 0;
+    f_threshold = false;
+    threshold = -10.0;
+
+    # Loop until the PriorityQueue is empty or we have found k vertices.
+    while !isempty(pq)
+        # Dequeue the vertex with the current lowest f value.
+        #println( "before dequeue!" );
+        v, v_val = peek( pq );
+        dequeue!(pq)
+        cost += 1;
+
+        if  v_val < curr
+            curr = v_val;
+        end
+        
+        ℓ = length( result )
+        if  ( ℓ >= k )
+            f_threshold = true;
+            while  ( length( result ) > k )
+                dequeue!( result );
+            end
+            _, threshold = peek( result )
+            #println( "threshold: ", threshold );
+            # Maybe too aggressive?
+            if  ( v_val > threshold )
+                break;
+            end
+        end
+
+        # Put it into the results...
+        result[ v ] = v_val;
+
+        N = outneighbors(G, v)
+
+        for  o ∈ N
+            cost += 1;
+            if  ( o ∈ visited )
+                continue
+            end
+
+            push!( visited, o );
+
+            o_val = f( o );
+            # @assert( o_val > 0.0 );
+            if  ( f_threshold   &&  ( threshold < o_val ) )
+                continue
+            end
+
+            enqueue!( pq, o, o_val );
+            enqueue!( result, o, o_val );
+
+            # Greedily jump if the improvement is significant...
+            if  ( o_val < δ * curr )
+                # Somewhat strangely, we need to re-push the current vertex.
+                enqueue!( pq, v, v_val )
+                break;
             end
         end
     end
 
-end                        
+    cl = collect( result );
+    rs = [cl[i]  for i ∈ length(cl):-1:1]
 
-function  nng_nearest_neighbor( _G::NNGraph{FMS}, 
-                                 q_real
-                                ) where {FMS}
-    G = _G.G;
-    n = _G.n;
-    result, cost = find_k_lowest_f( G, 1, 20, j -> dist_real( _G.m, j, q_real) );
-    u, dist = result[ 1 ];
-    
-    println( "u: ", u, "   dist : ", dist, cost );
+    return   rs, cost, visited
 end
+
+
+function  nn_add_edges!( G, m, i, r_i, factor )
+    function  dist_to_i( j )
+        return  dist( m, i, j )
+    end
+    #println( "TYPEOF: ", typeof( m ) );
+    result, _ = find_k_lowest_f(G, 1, 200, dist_to_i )
+    forced::Int64 = 3;
+    for (u, dista) ∈ result        
+        if (dista < factor * r_i ) ||  ( forced > 0 )
+            forced -= 1;
+            add_edge!(G, u, i)
+        end
+    end
+end
+
+function nng_greedy_dag!(_G::NNGraph{FMS},
+    R::Vector{Float64},
+    n::Int64,
+    factor::Float64=1.1
+) where {FMS}
+    G = _G.G
+    m = _G.m;
+    k = 200;
+    @assert(length(R) == n, "R must have the same length .")
+    for i ∈ 2:n
+        result, _ = find_k_lowest_f(G, 1, k, j -> dist( m, i, j))
+        edges_added = 0;
+        forced = 2;
+        count = 0;
+        for (u, dist) ∈ result
+            count += 1;
+            #f_add = ( count == 1 )  ||  
+            # the i-1 is important in the following line! It is the true distance.
+            if ( (dist < factor * R[ i - 1 ])  ||  ( forced > 0 ) )
+                edges_added += 1;
+                forced -= 1;
+                add_edge!(G, u, i)
+            end
+        end
+
+        if  ( edges_added == 0 )
+            dst = dist( m, 1, i );
+            for j = 1:i-1
+                dst = min( dst, dist( m, i, j) );
+            end
+            println( "No edges added for : ", i );
+            println( result );
+            println( "Real dist: ", dst );
+            println( R[ i - 1 ] );
+            println( R[ i ] );
+            exit( -1 );
+        end
+    end
+end
+
+
+function  nng_greedy_graph( m_i, I, D, factor );
+    n = size( m_i, 2 );
+    PS = MPointsSpace( m_i );
+    m = PermutMetric( PS, I );
+    G = NNGraph( m, n );
+
+    nng_greedy_dag!( G, D, n, factor )
+    return  G
+end
+
+
+function  nng_nn_search_all( _G::NNGraph{FMS}, 
+                                 q::Int,
+                                 k::Int = 20
+                                ) where {FMS}
+    result, _, visited = find_k_lowest_f( _G.G, 1, k, j -> dist( _G.m, j, q ) );
+
+    return  result, visited
+end
+
+function  nng_nn_search_reg( _G::NNGraph{FMS}, 
+                                 q::Int,
+                                 k::Int = 20
+                                ) where {FMS}
+    result, _ = nng_nn_search_all( _G, q, k );
+
+    return  result[ 1 ];
+end
+
+function  nng_nn_search( _G::NNGraph{FMS}, 
+                                 q_real,
+                                 k::Int = 20
+                                ) where {FMS}
+    result, cost = find_k_lowest_f( _G.G, 1, k, j -> dist_real( _G.m, j, q_real) );
+    
+    return  result[ 1 ];
+end
+
+function  nng_nn_search_print( _G::NNGraphFMS, 
+                               q_real,
+                               k::Int,
+                               ℓ::Float64
+                                ) where {NNGraphFMS}
+
+    result, cost = find_k_lowest_f( _G.G, 1, k, j -> dist_real( _G.m, j, q_real) );
+    result_g, cost_g = find_k_lowest_f_greedy( _G.G, 1, k,
+                                         j -> dist_real( _G.m, j, q_real) );
+    #println( result );
+    _,dist_g = result_g[1];
+    u, dist = result[ 1 ];
+    if  ( dist != ℓ )
+        @printf( "[k: %5d] cost: %7d/%7g   d: %12g/%12g\n", k, cost, cost_g,
+            dist, dist_g  )
+    else
+        @printf( "[k: %5d] cost: %7d   d: EXACT\n", k, cost  )
+    end
+    return result[ 1 ];
+end
+
+
+"""
+Build the nearest-neighbor search graph together with its permutation.
+The permutation is encoded in the permutation metric (i.e., m(i) is
+the i point in the greedy permutation).
+"""
+function nng_build_and_permut!( m::PermutMetric{FMS},
+                                factor::Float64 = 1.1 
+                        ) where {FMS}
+    n = size( m )
+    G = NNGraph( m, n );
+
+    R = fill( -1.0, n );
+    R[ 1 ] = 0.0;
+
+    # queue + radii 
+    qadii = PriorityQueue{Int, Float64}(Base.Reverse)
+    for i ∈ 2:n
+        R[ i ] = dist( m, 1, i )  # i == π[ i ] so redundant to use π 
+        enqueue!( qadii, i, R[ i ] )
+    end
+
+    println( "n = ", n );
+    i::Int = 2
+    c_count = 0
+    i_iter::Int64 = 0
+    while  ( !isempty( qadii ) )
+        i_iter += 1
+        curr, r_curr = peek( qadii )
+        _, new_rad = nng_nn_search_reg( G, curr );
+        #println( "Okay!" );
+        if  ( new_rad < 0.99 * r_curr )
+            qadii[ curr ] = r_curr = new_rad
+
+            # Maybe it did not change after all
+            ncurr, _ = peek( qadii )
+            if  ( ncurr != curr )
+                c_count += 1;
+                #                println( "CONTINUE!" );
+                continue;
+            end
+        end
+
+        # Okay, the point curr is the next point in the greedy permutation...
+        swap!( m, i, curr )
+
+        # A bit of shenanigan with the queue
+        r_i = qadii[ i ]
+        qadii[ curr ] = r_i;
+        dequeue!( qadii, i );
+
+        # Now we need to add the edges to the DAG...
+        nn_add_edges!( G.G, m, i, r_i, factor )
+
+        R[ i ] = r_curr;
+
+        i += 1;
+    end
+
+    println( "c_count: ", c_count, " / ", i_iter );
+    return  G, R;
+end
+
+
+function  test_nn_queries_2( fn_data, fn_queries )
+    m_i = read_fvecs( fn_data );
+    m_q = read_fvecs( fn_queries );
+    d::Int64 = size( m_i, 1 );
+    n::Int64 = size( m_i, 2 );
+    n_q::Int64 = size( m_q, 2 );
+    println( "Dimension: ", d );
+    println( "n        : ", n );
+    println( "n_q      : ", n_q );
+        
+    
+    PS = MPointsSpace( m_i );    
+    mp_rand = PermutMetric( PS );    
+    G_rand = NNGraph( mp_rand, n );
+
+    println( "Computing random DAG" );
+    nng_random_dag!( G_rand, n, 10 );
+
+    QS = MPointsSpace( m_q );
+    for i ∈ 1:n_q
+        println( "Query  ", i, ": " );
+        println( "rand       : " );
+        
+        nng_nn_search_print( G_rand, QS.m[ :, i ], 20 );
+        nng_nn_search_print( G_rand, QS.m[ :, i ], 40 );
+        nng_nn_search_print( G_rand, QS.m[ :, i ], 80 );
+        nng_nn_search_print( G_rand, QS.m[ :, i ], 400 );
+        nng_nn_search_print( G_rand, QS.m[ :, i ], 800 );
+    end
+
+end
+
+function  input_sift_small()
+    basedir = "data/sift/"
+    m_i = read_fvecs( basedir * "small_learn.fvecs" );
+    m_q = read_fvecs( basedir * "small_query.fvecs" );
+    return  m_i, m_q;
+end
+
+function  input_sift()
+    basedir = "data/sift/"
+    m_i = read_fvecs( basedir * "learn.fvecs" );
+    m_q = read_fvecs( basedir * "query.fvecs" );
+    return  m_i, m_q;
+end
+
+
+function  input_random( n, n_q, d )
+    return   rand( d, n ), rand( d, n_q );
+end
+
+
+function  nn_search_brute_force( m_i, q_real )::Float64
+    dst::Float64 = euclidean( m_i[ :, 1 ], q_real );
+    n = size( m_i, 2 );
+    for  j ∈ 2:n
+        new_dst = euclidean( m_i[ :, j ], q_real );
+        if  ( new_dst < dst )
+            dst = new_dst;
+            if  ( dst == 0.0 )
+                println( "DST: ", euclidean( m_i[ :, j ], q_real )  );
+                println( "j: ", j );
+            end
+        end
+    end
+
+    return  dst;
+end
+
+"""
+    Check that the greedy graph has strong connectivity and all the nearest-neighbors are reachable from the first vertex.
+"""
+function  check_greedy_dag_failure_slow( m_i, m_q, I, D, factor )
+    d::Int64 = size( m_i, 1 );
+    n::Int64 = size( m_i, 2 );
+    n_q::Int64 = size( m_q, 2 );
+    
+    PS = MPointsSpace( m_i );
+    m = PermutMetric( PS, I );
+    GB     = NNGraph( m, n )
+
+    nng_greedy_dag!( GB, D, n, factor )    
+    for i ∈ 1:n_q
+        real_dist = nn_search_brute_force( m_i, m_q[ :, i] );
+            
+        dist = nng_nn_search( GB, m_q[ :, i ], n )[ 2 ];
+
+        if  ( dist != real_dist )
+            println( "greedy DAG failed for ", factor )
+            println( "dist      : ", dist );
+            println( "real_dist : ", real_dist );
+            println( "Query: ", m_q[ :, i ] );
+
+            G = SimpleWeightedDiGraph( GB.G );
+            dot = plot_graphviz( G );
+            write_dot_file( G, "test.dot" );
+
+            for  e ∈ edges( GB.G )
+                println( e )
+            end
+            println( D );
+            exit( -1 );
+        end
+    end
+    println( "Greedy DAG passed for: ", factor );
+end
+
+"""
+Given a set of vertices V in the metric of G, the following function
+robustly prune it as described in the Disk-Ann paper, iterative adding the closest point to the out-set, while removing its Apollonius ball from V. 
+"""
+function  robust_prune( G::NNGraphFMS, p, V::Set{Int},
+                           α, max_size ) where {NNGraphFMS}
+    pq     = PriorityQueue{Int, Float64}()
+
+    N = union( Set{Int}( outneighbors(G, p) ), V );
+    delete!( N, p );
+    
+    for  o ∈ N
+        push!( pq, o, dist( G.m, p, o ) )
+    end
+
+    out = Set{Int}();
+    while  ( ! isempty( pq ) )
+        v, v_val = peek( pq );
+        dequeue!(pq)
+        push!( out, v );
+        if  ( length( out ) >= max_size )
+            break
+        end
+        del_list = Vector{Int}();
+        for xp ∈ pq
+            x = xp[1]
+            if   α * dist( G.m, v, x ) <= dist( G.m, p, x )
+                push!( del_list, x );
+            end
+        end
+        for x ∈ del_list
+            delete!( pq, x );
+        end
+    end
+    
+    return out;
+end
+
+function  robust_prune_vertex!( G::NNGraphFMS, p, V::Set{Int},
+                           α, max_size ) where {NNGraphFMS}
+    out =  robust_prune( G, p, V, α, max_size );
+
+    neighbors_to_delete = Set{Int}( collect(outneighbors(g, p)) );
+    del_list = setdiff( neighbors_to_delete, out );
+    add_list = setdiff( out, neighbors_to_delete );
+    
+    for t in del_list
+        rem_edge!( G.G, p, t)
+    end
+    for t in add_list
+        add_edge!( G.G, p, t)
+    end
+end
+
+
+function random_perm_no_selfies( n )
+    while  true
+        p = randperm(n)
+
+        f_good = true;
+        for i ∈ 1:n
+            if  p[ i ] == i
+                f_good = false;
+                break;
+            end
+        end
+        if  f_good
+            return  p
+        end
+    end
+end
+
+function generate_directed_random_graph(n::Int, d::Int)
+    G = DiGraph(n)
+
+    for  i ∈ 1:d
+        p = random_perm_no_selfies( n );
+        for  i ∈ 1:n
+            if  ! has_edge( G, i, p[ i ] )
+                add_edge!( G, i, p[ i ] )
+            end
+        end
+    end
+
+    return G
+end
+
+function  disk_ann_clean( G, α, L, max_degree )
+    n = size( G.m )
+    for i ∈ 1:n
+        π = randperm(n)
+        result, V = nng_nn_search_all( G, π[ i ], L );
+        out = robust_prune( G, π[ i ], V, α, max_degree );
+        for j ∈ out
+            if  ( outdegree( G.G, π[ i ] ) >= R )
+                U = Set{Int}( outneighbors( G.G, j ) )
+                push!( U, π[ i ] );
+                robust_prune_vertex!( G, j, U, α, max_degree );
+            else
+                add_edge!( G.G, j, π[ i ] );
+            end
+        end
+    end
+    
+    return  G
+end
+
+function  disk_ann_build_graph( m, α, L, max_degree )
+    n = size( m )
+    _G = generate_directed_random_graph( n, R )
+    G = NNGraph( n, m, _G, "disk_ann" );
+    for i ∈ 1:n
+        π = randperm(n)
+        result, V = nng_nn_search_all( G, π[ i ], L );
+        out = robust_prune( G, π[ i ], V, α, max_degree );
+        for j ∈ out
+            if  ( outdegree( G.G, π[ i ] ) >= R )
+                U = Set{Int}( outneighbors( G.G, j ) )
+                push!( U, π[ i ] );
+                robust_prune_vertex!( G, j, U, α, max_degree );
+            else
+                add_edge!( G.G, j, π[ i ] );
+            end
+        end
+    end
+    
+    return  G
+end
+
+
+function  test_nn_queries( m_i, m_q )
+    @assert( size( m_i, 1 ) == size( m_q, 1 ) );
+    d::Int64 = size( m_i, 1 );
+    n::Int64 = size( m_i, 2 );
+    n_q::Int64 = size( m_q, 2 );
+    
+    println( "Dimension: ", d );
+    println( "n        : ", n );
+    println( "n_q      : ", n_q );
+    
+    PS = MPointsSpace( m_i );
+    
+    m = PermutMetric( PS );
+    mp = PermutMetric( PS );
+
+    println( "Computing greedy permutation" );
+    @time I, D = greedy_permutation_naive( PS, n )
+    
+    
+    f_check_slow = false;
+    if  ( f_check_slow )
+        println( "Checking that the greedy DAG indeed works!" );
+        check_greedy_dag_failure_slow( m_i, m_q, I, D, 1.01 );
+    end
+
+    println( "Random graph: " );
+    @time G_rand = nng_random_dag( MPointsSpace( m_i ), 10 );
+    description!( G_rand, "Random (10)" );
+
+    println( "Greedy graph 1.1 " );
+    @time G_1_1 = nng_greedy_graph( m_i, I, D, 1.1 );    
+    description!( G_1_1, "Greedy (1.1)" );
+
+    println( "Greedy graph 1.2 " );
+    @time G_1_2 = nng_greedy_graph( m_i, I, D, 1.2 );    
+    description!( G_1_2, "Greedy (1.2)" );
+
+    println( "Greedy graph 2.0 " );
+    @time G_2 = nng_greedy_graph( m_i, I, D, 2.0 );    
+    description!( G_2, "Greedy (2.0)" );
+
+
+    m_inc = PermutMetric(  MPointsSpace( m_i ) );
+    
+    @time G_inc_1_3, _ = nng_build_and_permut!( m_inc, 1.3 );
+    description!( G_inc_1_3, "Inc nn 1.3" );
+    
+    QS = MPointsSpace( m_q );
+
+    Graphs = [G_rand, G_1_1, G_1_2, G_2, G_inc_1_3 ];
+    println( typeof( Graphs ) );
+    lens = [1,2,4,8,16,20, 40, 80, 160, 320, 1000 ];
+    
+    for i ∈ 1:n_q
+        ℓ = nn_search_brute_force( m_i, m_q[ :, i] )
+        println( "Query ", i, " (", ℓ, "):" );
+
+        for G ∈ Graphs            
+            println( "\n---- ", G.desc );
+            for  k ∈ lens
+                nng_nn_search_print( G, QS.m[ :, i ], k, ℓ );
+            end
+            
+            println( "" );
+        end
+        
+    end
+
+    println( "\nn: ", n );
+    for  G ∈ Graphs
+        println( "----------------------------------------------------" );
+        @printf( "%-20s  #edges: %8d   avg_deg: %g\n", G.desc,
+            ne( G.G ), ne(G.G)/n );
+    end
+
+    return 0;
+end
+
 
 
 function  (@main)(args)
-
-    if  ( length( args ) == 2 )
-        m_i = read_fvecs( args[ 1 ] );
-        m_q = read_fvecs( args[ 2 ] );
-        d::Int64 = size( m_i, 1 );
-        n::Int64 = size( m_i, 2 );
-        n_q::Int64 = size( m_q, 2 );
-        println( "Dimension: ", d );
-        println( "n        : ", n );
-        println( "n_q      : ", n_q );
-        
-        #m=hcat( m_i, m_q );
-
-        PS = MPointsSpace( m_i );
-        I, D = greedy_permutation_naive( PS, n )
-
-        #println( "I  (type): ", typeof( I ) )
-        #println( "PS (type): ", typeof( PS ) )
-        m = PermutMetric( PS, I );
-        G_rand = NNGraph( m, n );
-        GB = NNGraph( m, n );
-        nng_random_dag( G_rand, n, 10 );
-
-        nng_greedy_dag( GB, D, n, 2.1 )
-        println( "# edges random(10) : ", ne(G_rand.G) );
-        println( "# edges greedy     : ", ne(GB.G) );
-
-        QS = MPointsSpace( m_q );
-        for i ∈ 1:n_q
-            println( "Query ", i, ": " );
-            nng_nearest_neighbor( G_rand, QS.m[ :, i ] );
-            nng_nearest_neighbor( GB, QS.m[ :, i ] );
-        end
-        #=
-        for i ∈ 1:n
-            println( i, ":", I[i], "  D: ", D[i ] );
-        end
-        =#
-        
-        exit
-    end
-
-    
-    n = 10;
-    P = Polygon_random( 2, Float64, n );
-
-    println( length( args ) )
-
-    println( "Hello world!" );
-    PS = PointsSpace( Points( P ) );
-    I, D = greedy_permutation_naive( PS, n )
-
-    println( typeof( I ) )
-    println( typeof( D ) )
-    #=
-    for i ∈ 1:n
-        println( i, ":", I[i], "  D: ", D[i ] );
-    end
-    =#
-    
-    return  0;
+    #m_i, m_q = input_random( 10000, 10000, 2 )
+    #m_i, m_q = input_random( 1000, 1000, 8 )
+    m_i, m_q = input_sift_small()# # 10000, 1000, 8 );
+    test_nn_queries( m_i, m_q )
+    return  0
 end
+
 
