@@ -17,6 +17,8 @@ using PlotGraphviz
 
 using SimpleWeightedGraphs
 
+using TimerOutputs
+
 abstract type AbstractFMetricSpace end
 """
     metric(space::AbstractFMetricSpace, x, y)
@@ -485,6 +487,8 @@ function  nn_add_edges!( G, m, i, r_i, factor )
     function  dist_to_i( j )
         return  dist( m, i, j )
     end
+
+    out = Vector{Int64}()
     #println( "TYPEOF: ", typeof( m ) );
     result, _ = find_k_lowest_f(G, 1, 200, dist_to_i )
     forced::Int64 = 3;
@@ -492,8 +496,11 @@ function  nn_add_edges!( G, m, i, r_i, factor )
         if (dista < factor * r_i ) ||  ( forced > 0 )
             forced -= 1;
             add_edge!(G, u, i)
+            push!( out, u )
         end
     end
+
+    return  out
 end
 
 function nng_greedy_dag!(_G::NNGraph{FMS},
@@ -601,9 +608,13 @@ Build the nearest-neighbor search graph together with its permutation.
 The permutation is encoded in the permutation metric (i.e., m(i) is
 the i point in the greedy permutation).
 """
-function nng_build_and_permut!( m::PermutMetric{FMS},
-                                factor::Float64 = 1.1 
-                        ) where {FMS}
+function nng_build_and_permut!(
+    m::PermutMetric{FMS},
+    factor::Float64 = 1.1,
+    f_prune = false,
+    α::Float64 = 0.0,
+    max_degree = 0
+) where {FMS}
     n = size( m )
     G = NNGraph( m, n );
 
@@ -647,8 +658,16 @@ function nng_build_and_permut!( m::PermutMetric{FMS},
         dequeue!( qadii, i );
 
         # Now we need to add the edges to the DAG...
-        nn_add_edges!( G.G, m, i, r_i, factor )
+        N = nn_add_edges!( G.G, m, i, r_i, factor )
 
+        if  ( f_prune )
+            for v ∈ N
+                if  outdegree( G.G, v ) > max_degree
+                    U = Set{Int}( outneighbors( G.G, v ) )
+                    robust_prune_vertex!( G, v, U, α, max_degree );
+                end
+            end                    
+        end
         R[ i ] = r_curr;
 
         i += 1;
@@ -672,10 +691,10 @@ function  test_nn_queries_2( fn_data, fn_queries )
     
     PS = MPointsSpace( m_i );    
     mp_rand = PermutMetric( PS );    
-    G_rand = NNGraph( mp_rand, n );
+    #G_rand = NNGraph( mp_rand, n );
 
-    println( "Computing random DAG" );
-    nng_random_dag!( G_rand, n, 10 );
+    #println( "Computing random DAG" );
+    #nng_random_dag!( G_rand, n, 10 );
 
     QS = MPointsSpace( m_q );
     for i ∈ 1:n_q
@@ -771,7 +790,7 @@ Given a set of vertices V in the metric of G, the following function
 robustly prune it as described in the Disk-Ann paper, iterative adding the closest point to the out-set, while removing its Apollonius ball from V. 
 """
 function  robust_prune( G::NNGraphFMS, p, V::Set{Int},
-                           α, max_size ) where {NNGraphFMS}
+                        α::Float64, max_size ) where {NNGraphFMS}
     pq     = PriorityQueue{Int, Float64}()
 
     N = deepcopy( V ); #union( Set{Int}( ), V );
@@ -805,8 +824,9 @@ function  robust_prune( G::NNGraphFMS, p, V::Set{Int},
         end
     end
     
-    return out;
+    return out
 end
+
 
 function  robust_prune_vertex!( G::NNGraphFMS, p, V::Set{Int},
                            α, max_size ) where {NNGraphFMS}
@@ -858,14 +878,20 @@ function generate_directed_random_graph(n::Int, d::Int)
     return G
 end
 
-function  disk_ann_clean( G, α, L, max_degree )
+
+function  disk_ann_clean( G, α::Float64, L::Int64, max_degree::Int64, f_prune_curr::Bool = false )
     n = size( G.m )
     π = randperm(n)
     for i ∈ 1:n
+        if  ( f_prune_curr  &&  ( outdegree( G.G, π[ i ] ) > max_degree ) )
+            U = Set{Int}( outneighbors( G.G, π[ i ] ) )
+            robust_prune_vertex!( G, π[ i ], U, α, max_degree );
+        end
         result, V = nng_nn_search_all( G, π[ i ], L );
         out = robust_prune( G, π[ i ], V, α, max_degree );
         for j ∈ out
-            if  ( outdegree( G.G, π[ i ] ) >= max_degree )
+            # π[ i ]???? Verify.
+            if  ( outdegree( G.G, j ) >= max_degree )
                 U = Set{Int}( outneighbors( G.G, j ) )
                 push!( U, π[ i ] );
                 robust_prune_vertex!( G, j, U, α, max_degree );
@@ -882,7 +908,7 @@ function  disk_ann_build_graph( m, α, L, max_degree )
     n = size( m )
     _G = generate_directed_random_graph( n, 2*max_degree )
     G = NNGraph( n, m, _G, "disk_ann" );
-    L = 20;
+    #L = 20;
     
     disk_ann_clean( G, α, L, max_degree )
     disk_ann_clean( G, α, L, max_degree )
@@ -892,6 +918,8 @@ end
 
 
 function  test_nn_queries( m_i, m_q )
+    T = TimerOutput();
+    
     @assert( size( m_i, 1 ) == size( m_q, 1 ) );
     d::Int64 = size( m_i, 1 );
     n::Int64 = size( m_i, 2 );
@@ -907,7 +935,7 @@ function  test_nn_queries( m_i, m_q )
     mp = PermutMetric( PS );
 
     println( "Computing greedy permutation" );
-    @time I, D = greedy_permutation_naive( PS, n )
+    @timeit T "GPermut" I, D = greedy_permutation_naive( PS, n )
     
     
     f_check_slow = false;
@@ -916,65 +944,90 @@ function  test_nn_queries( m_i, m_q )
         check_greedy_dag_failure_slow( m_i, m_q, I, D, 1.01 );
     end
 
-    println( "Random graph: " );
-    @time G_rand = nng_random_dag( MPointsSpace( m_i ), 10 );
-    description!( G_rand, "Random (10)" );
+    #println( "Random graph: " );
+    #@timeit T "RGraph" G_rand = nng_random_dag( MPointsSpace( m_i ), 10 );
+    #description!( G_rand, "Random (10)" );
+
+    Graphs = Vector{NNGraph}()
 
     println( "Greedy graph 1.1 " );
-    @time G_1_1 = nng_greedy_graph( m_i, I, D, 1.1 );    
+    @timeit T "GGraph 1.1" G_1_1 = nng_greedy_graph( m_i, I, D, 1.1 );    
     description!( G_1_1, "Greedy (1.1)" );
-
+    push!( Graphs, G_1_1 );
+    
     println( "Greedy graph 1.2 " );
-    @time G_1_2 = nng_greedy_graph( m_i, I, D, 1.2 );    
+    @timeit T "GGraph 1.2" G_1_2 = nng_greedy_graph( m_i, I, D, 1.2 );    
     description!( G_1_2, "Greedy (1.2)" );
+    push!( Graphs, G_1_2 );
 
     println( "Greedy graph 2.0 " );
-    @time G_2 = nng_greedy_graph( m_i, I, D, 2.0 );    
+    @timeit T "GGraph 2.0" G_2 = nng_greedy_graph( m_i, I, D, 2.0 );    
     description!( G_2, "Greedy (2.0)" );
+    push!( Graphs, G_2 );
 
 
     m_inc = PermutMetric(  MPointsSpace( m_i ) );
 
     println( "Incremental graph construction (1.3)" );
-    @time G_inc_1_3, _ = nng_build_and_permut!( m_inc, 1.3 );
+    @timeit T "GInc 1.3"  G_inc_1_3, _ = nng_build_and_permut!( m_inc, 1.3 );
     description!( G_inc_1_3, "Inc nn 1.3" );
+    push!( Graphs, G_inc_1_3 );
 
     α = 1.4
     L = 40
-    max_degree = 5;
+    max_degree = 10
 
+    m_inc_b = PermutMetric(  MPointsSpace( m_i ) );
     println( "Incremental graph construction (1.6)" );
-    @time G_inc_1_6, _ = nng_build_and_permut!( m_inc, 1.6 );
+    @timeit T "GInc 1.6"   G_inc_1_6, _   = nng_build_and_permut!( m_inc_b, 1.6 );
     description!( G_inc_1_6, "Inc nn 1.6" );
-    disk_ann_clean( G_inc_1_6, α, L, max_degree )
+    m_inc_1_6_b = ne( G_inc_1_6.G );
+    @timeit T "GInc 1.6 (clean)" disk_ann_clean( G_inc_1_6, α, L, max_degree, true )
+    m_inc_1_6_a = ne( G_inc_1_6.G );
+    push!( Graphs, G_inc_1_6 );
 
-    G_disk_ann = disk_ann_build_graph( MPointsSpace( m_i ), α, L, max_degree )
-    description!( G_disk_ann, "DiskAnn( α = " * string( α ) * ", L = " * string( L )
-                * "maxd: " * string(max_degree) );
+    m_inc_c = PermutMetric(  MPointsSpace( m_i ) );
+    println( "Incremental graph construction (1.6) + prune" );
+    @timeit T "GInc 1.6 P" G_inc_1_6_p, _ =
+               nng_build_and_permut!( m_inc_c, 1.6, true, α, max_degree );
+    description!( G_inc_1_6_p, "Inc nn 1.6 P" );
+    push!( Graphs, G_inc_1_6_p );
     
+    @timeit T "DiskAnn" G_disk_ann = disk_ann_build_graph( MPointsSpace( m_i ), α, L, max_degree )
+    description!( G_disk_ann, "DiskAnn( α:" * string( α ) * " L:" * string( L )
+                * " d:" * string(max_degree) );
+    push!( Graphs, G_disk_ann );
+
+    #############################################################
     QS = MPointsSpace( m_q );
-    
-    Graphs = [G_rand, G_1_1, G_1_2, G_2,
-              G_inc_1_3, G_inc_1_6,
+
+    #=
+    Graphs = [ G_1_1, G_1_2, G_2,
+              G_inc_1_3, G_inc_1_6,G_inc_1_6_p,
               G_disk_ann ];
     println( typeof( Graphs ) );
+    exit( -1 );
+    =#
     lens = [1,2,4,8,16,20, 40, 80, 160, 320, 1000 ];
-    
-    println( "Query testing starting..." );
-    for i ∈ 1:n_q
-        ℓ = nn_search_brute_force( m_i, m_q[ :, i] )
-        println( "Query ", i, " (", ℓ, "):" );
 
-        for G ∈ Graphs            
-            println( "\n---- ", G.desc );
-            for  k ∈ lens
-                nng_nn_search_print( G, QS.m[ :, i ], k, ℓ );
-            end
+    function  query_testing() 
+        println( "Query testing starting..." );
+        for i ∈ 1:n_q
+            ℓ = nn_search_brute_force( m_i, m_q[ :, i] )
+            println( "Query ", i, " (", ℓ, "):" );
             
-            println( "" );
+            for G ∈ Graphs            
+                println( "\n---- ", G.desc );
+                for  k ∈ lens
+                    nng_nn_search_print( G, QS.m[ :, i ], k, ℓ );
+                end
+                
+                println( "" );
+            end
         end
     end
-
+    query_testing()
+    
     println( "\nn: ", n );
     for  G ∈ Graphs
         println( "----------------------------------------------------" );
@@ -982,6 +1035,12 @@ function  test_nn_queries( m_i, m_q )
             ne( G.G ), ne(G.G)/n );
     end
 
+    show( T, allocations=false, compact = true )
+    println( "" );
+
+    println( "GInc 1.6 #Edges before ", m_inc_1_6_b );
+    println( "GInc 1.6 #Edges after  ", m_inc_1_6_a );
+    
     return 0;
 end
 
@@ -989,8 +1048,8 @@ end
 
 function  (@main)(args)
     #m_i, m_q = input_random( 100, 10, 2 )
-    #m_i, m_q = input_random( 1000, 1000, 8 )
-    m_i, m_q = input_sift_small()# # 10000, 1000, 8 );
+    m_i, m_q = input_random( 10000, 50, 8 )
+    #m_i, m_q = input_sift_small()# # 10000, 1000, 8 );
     test_nn_queries( m_i, m_q )
     return  0
 end
