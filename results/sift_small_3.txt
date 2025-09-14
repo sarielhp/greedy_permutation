@@ -1,0 +1,1563 @@
+Dimension: 128
+n        : 25000
+n_q      : 100
+Computing greedy permutation
+m: 25000
+Building greedy graph 1.2
+Done
+
+Building greedy graph 2.0
+Cleaning...
+Done
+
+Incremental graph construction (1.6)
+n = 25000
+c_count: 102547 / 127546
+Cleaning...
+Incremental graph construction (2.0)
+n = 25000
+c_count: 102828 / 127827
+Cleaning...
+Incremental prune graph construction (1.6)
+n = 25000
+c_count: 99532 / 124531
+Cleaning...
+Incremental prune graph construction (2.0)
+n = 25000
+c_count: 101113 / 126112
+Cleaning...
+Query testing starting...
+Int64
+DST: 0.0
+j: 22
+Query 1 (0.0):
+---- Greedy (1.2)              k:    1: cost:    1494   d: Exact
+---- Greedy (2.0)              k:    1: cost:     868   d: Exact
+---- Greedy (2.0)C             k:    1: cost:     868   d: Exact
+---- GInc 1.6                  k:    1: cost:    1405   d: Exact
+---- GInc 1.6C                 k:    1: cost:    1405   d: Exact
+---- GInc 2.0                  k:    1: cost:    1522   d: Exact
+---- GInc 2.0C                 k:    1: cost:    1522   d: Exact
+---- GInc P 1.6                k:    1: cost:    1522   d: Exact
+---- GInc P 1.6C               k:  160: cost:    1259   d: Exact
+---- GInc P 2.0                k:  160: cost:    1259   d: Exact
+---- GInc P 2.0C               k:  320: cost:    2064   d: Exact
+---- DiskAnn(1.4,40,10         k:   16: cost:     196   d: Exact
+DST: 0.0
+j: 33
+Query 2 (0.0):
+---- Greedy (1.2)              k:    1: cost:     715   d: Exact
+---- Greedy (2.0)              k:    1: cost:    1255   d: Exact
+---- Greedy (2.0)C             k:   16: cost:     376   d: Exact
+---- GInc 1.6                  k:    1: cost:    1069   d: Exact
+---- GInc 1.6C                 k:   80: cost:     904   d: Exact
+---- GInc 2.0                  k:    1: cost:    1297   d: Exact
+---- GInc 2.0C                 k:   80: cost:     847   d: Exact
+---- GInc P 1.6                k:   80: cost:     847   d: Exact
+---- GInc P 1.6C               k:  160: cost:    1908   d: Exact
+---- GInc P 2.0                k:  160: cost:    1908   d: Exact
+---- GInc P 2.0C               k:  320: cost:    2510   d: Exact
+---- DiskAnn(1.4,40,10         k:    1: cost:     115   d: Exact
+DST: 0.0
+j: 37
+Query 3 (0.0):
+---- Greedy (1.2)              k:    1: cost:     636   d: Exact
+---- Greedy (2.0)              k:    1: cost:    1372   d: Exact
+---- Greedy (2.0)C             k:    1: cost:      60   d: Exact
+---- GInc 1.6                  k:    1: cost:    1827   d: Exact
+---- GInc 1.6C                 k:    1: cost:      66   d: Exact
+---- GInc 2.0                  k:    2: cost:    2742   d: Exact
+---- GInc 2.0C                 k:    1: cost:      59   d: Exact
+---- GInc P 1.6                k:    1: cost:     696   d: Exact
+---- GInc P 1.6C               k:    1: cost:      63   d: Exact
+---- GInc P 2.0                k:    4: cost:     766   d: Exact
+---- GInc P 2.0C               k:    2: cost:      80   d: Exact
+---- DiskAnn(1.4,40,10         k:    1: cost:      71   d: Exact
+DST: 0.0
+j: 58
+Query 4 (0.0):
+---- Greedy (1.2)              k:    1: cost:     680   d: Exact
+---- Greedy (2.0)              k:    1: cost:    1779   d: Exact
+---- Greedy (2.0)C             k:   16: cost:     203   d: Exact
+---- GInc 1.6                  k:    1: cost:     896   d: Exact
+---- GInc 1.6C                 k:   40: cost:     552   d: Exact
+---- GInc 2.0                  k:    1: cost:    1041   d: Exact
+---- GInc 2.0C                 k:   40: cost:     530   d: Exact
+---- GInc P 1.6                k:   40: cost:     530   d: Exact
+---- GInc P 1.6C               k:   80: cost:     847   d: Exact
+---- GInc P 2.0                k:   80: cost:     847   d: Exact
+---- GInc P 2.0C               k:  160: cost:    1508   d: Exact
+---- DiskAnn(1.4,40,10         k:    2: cost:     155   d: Exact
+DST: 0.0
+j: 59
+Query 5 (0.0):
+---- Greedy (1.2)              k:    1: cost:    1390   d: Exact
+---- Greedy (2.0)              k:    1: cost:    1200   d: Exact
+---- Greedy (2.0)C             k:    8: cost:     216   d: Exact
+---- GInc 1.6                  k:    1: cost:    1342   d: Exact
+---- GInc 1.6C                 k:    8: cost:     213   d: Exact
+---- GInc 2.0                  k:    1: cost:    1471   d: Exact
+---- GInc 2.0C                 k:   16: cost:     253   d: Exact
+---- GInc P 1.6                k:    1: cost:     826   d: Exact
+---- GInc P 1.6C               k:    4: cost:     148   d: Exact
+---- GInc P 2.0                k:    1: cost:     661   d: Exact
+---- GInc P 2.0C               k:    8: cost:     178   d: Exact
+---- DiskAnn(1.4,40,10         k:    4: cost:     115   d: Exact
+DST: 0.0
+j: 74
+Query 6 (0.0):
+---- Greedy (1.2)              k:   40: cost:    2429   d: Exact
+---- Greedy (2.0)              k:    1: cost:    1031   d: Exact
+---- Greedy (2.0)C             k:   40: cost:     560   d: Exact
+---- GInc 1.6                  k:    1: cost:    1559   d: Exact
+---- GInc 1.6C                 k:   80: cost:    1021   d: Exact
+---- GInc 2.0                  k:    1: cost:    1656   d: Exact
+---- GInc 2.0C                 k:   80: cost:     995   d: Exact
+---- GInc P 1.6                k:   80: cost:     995   d: Exact
+---- GInc P 1.6C               k:   16: cost:     389   d: Exact
+---- GInc P 2.0                k:    1: cost:     682   d: Exact
+---- GInc P 2.0C               k:  320: cost:    1957   d: Exact
+---- DiskAnn(1.4,40,10         k:    2: cost:     103   d: Exact
+DST: 0.0
+j: 89
+Query 7 (0.0):
+---- Greedy (1.2)              k:    1: cost:     564   d: Exact
+---- Greedy (2.0)              k:    1: cost:    1576   d: Exact
+---- Greedy (2.0)C             k:   20: cost:     418   d: Exact
+---- GInc 1.6                  k:    1: cost:    1801   d: Exact
+---- GInc 1.6C                 k:  160: cost:    1483   d: Exact
+---- GInc 2.0                  k:    1: cost:    2036   d: Exact
+---- GInc 2.0C                 k:  160: cost:    1761   d: Exact
+---- GInc P 1.6                k:  160: cost:    1761   d: Exact
+---- GInc P 1.6C               k:   80: cost:    1051   d: Exact
+---- GInc P 2.0                k:   80: cost:    1051   d: Exact
+---- GInc P 2.0C               k:  160: cost:    1780   d: Exact
+---- DiskAnn(1.4,40,10         k:   16: cost:     276   d: Exact
+DST: 0.0
+j: 90
+Query 8 (0.0):
+---- Greedy (1.2)              k:    1: cost:     501   d: Exact
+---- Greedy (2.0)              k:    1: cost:    1212   d: Exact
+---- Greedy (2.0)C             k:    8: cost:     225   d: Exact
+---- GInc 1.6                  k:    1: cost:     984   d: Exact
+---- GInc 1.6C                 k:   16: cost:     369   d: Exact
+---- GInc 2.0                  k:    1: cost:    1001   d: Exact
+---- GInc 2.0C                 k:    8: cost:     231   d: Exact
+---- GInc P 1.6                k:    1: cost:     461   d: Exact
+---- GInc P 1.6C               k:    8: cost:     257   d: Exact
+---- GInc P 2.0                k:    1: cost:     884   d: Exact
+---- GInc P 2.0C               k:   40: cost:     540   d: Exact
+---- DiskAnn(1.4,40,10         k:    1: cost:     101   d: Exact
+DST: 0.0
+j: 92
+Query 9 (0.0):
+---- Greedy (1.2)              k:  160: cost:    3061   d: Exact
+---- Greedy (2.0)              k:  160: cost:    7133   d: Exact
+---- Greedy (2.0)C             k:   80: cost:     398   d: Exact
+---- GInc 1.6                  k:  320: cost:    7528   d: Exact
+---- GInc 1.6C                 k:   40: cost:     273   d: Exact
+---- GInc 2.0                  k:    1: cost:    2750   d: Exact
+---- GInc 2.0C                 k:   40: cost:     254   d: Exact
+---- GInc P 1.6                k:   40: cost:     254   d: Exact
+---- GInc P 1.6C               k:   40: cost:     285   d: Exact
+---- GInc P 2.0                k:  320: cost:    5645   d: Exact
+---- GInc P 2.0C               k:    8: cost:     109   d: Exact
+---- DiskAnn(1.4,40,10         k:    4: cost:      86   d: Exact
+DST: 0.0
+j: 94
+Query 10 (0.0):
+---- Greedy (1.2)              k:    1: cost:    1390   d: Exact
+---- Greedy (2.0)              k:    1: cost:    2351   d: Exact
+---- Greedy (2.0)C             k:   16: cost:     256   d: Exact
+---- GInc 1.6                  k:    1: cost:    2208   d: Exact
+---- GInc 1.6C                 k:   16: cost:     258   d: Exact
+---- GInc 2.0                  k:    1: cost:    2297   d: Exact
+---- GInc 2.0C                 k:   16: cost:     248   d: Exact
+---- GInc P 1.6                k:    8: cost:    1281   d: Exact
+---- GInc P 1.6C               k:   16: cost:     248   d: Exact
+---- GInc P 2.0                k:    8: cost:    1623   d: Exact
+---- GInc P 2.0C               k:   40: cost:     435   d: Exact
+---- DiskAnn(1.4,40,10         k:    4: cost:     119   d: Exact
+DST: 0.0
+j: 101
+Query 11 (0.0):
+---- Greedy (1.2)              k:    1: cost:    1367   d: Exact
+---- Greedy (2.0)              k:    1: cost:    1451   d: Exact
+---- Greedy (2.0)C             k:   80: cost:    1098   d: Exact
+---- GInc 1.6                  k:    1: cost:    1258   d: Exact
+---- GInc 1.6C                 k:   80: cost:    1035   d: Exact
+---- GInc 2.0                  k:    1: cost:    1407   d: Exact
+---- GInc 2.0C                 k:  160: cost:    1151   d: Exact
+---- GInc P 1.6                k:  160: cost:    1151   d: Exact
+---- GInc P 1.6C               k:   80: cost:    1122   d: Exact
+---- GInc P 2.0                k:   80: cost:    1122   d: Exact
+---- GInc P 2.0C               k:   40: cost:     676   d: Exact
+---- DiskAnn(1.4,40,10         k:    4: cost:     144   d: Exact
+DST: 0.0
+j: 102
+Query 12 (0.0):
+---- Greedy (1.2)              k:    1: cost:    1324   d: Exact
+---- Greedy (2.0)              k:    1: cost:    3135   d: Exact
+---- Greedy (2.0)C             k:    1: cost:      30   d: Exact
+---- GInc 1.6                  k:    1: cost:    2641   d: Exact
+---- GInc 1.6C                 k:    2: cost:      65   d: Exact
+---- GInc 2.0                  k:  320: cost:    5700   d: Exact
+---- GInc 2.0C                 k:    4: cost:     103   d: Exact
+---- GInc P 1.6                k:    1: cost:     526   d: Exact
+---- GInc P 1.6C               k:    1: cost:      33   d: Exact
+---- GInc P 2.0                k: 1000: cost:    6615   d: Exact
+---- GInc P 2.0C               k:    8: cost:     127   d: Exact
+---- DiskAnn(1.4,40,10         k:    8: cost:     192   d: Exact
+DST: 0.0
+j: 112
+Query 13 (0.0):
+---- Greedy (1.2)              k:    1: cost:     520   d: Exact
+---- Greedy (2.0)              k:    1: cost:    1491   d: Exact
+---- Greedy (2.0)C             k:   40: cost:     490   d: Exact
+---- GInc 1.6                  k:    1: cost:    1146   d: Exact
+---- GInc 1.6C                 k:   40: cost:     646   d: Exact
+---- GInc 2.0                  k:    1: cost:    1368   d: Exact
+---- GInc 2.0C                 k:   80: cost:     929   d: Exact
+---- GInc P 1.6                k:   80: cost:     929   d: Exact
+---- GInc P 1.6C               k:   80: cost:    1025   d: Exact
+---- GInc P 2.0                k:    1: cost:     893   d: Exact
+---- GInc P 2.0C               k:   40: cost:     793   d: Exact
+---- DiskAnn(1.4,40,10         k:    4: cost:     148   d: Exact
+DST: 0.0
+j: 129
+Query 14 (0.0):
+---- Greedy (1.2)              k:    1: cost:     605   d: Exact
+---- Greedy (2.0)              k:    1: cost:    1272   d: Exact
+---- Greedy (2.0)C             k:   80: cost:    1073   d: Exact
+---- GInc 1.6                  k:    1: cost:    1257   d: Exact
+---- GInc 1.6C                 k:   40: cost:     702   d: Exact
+---- GInc 2.0                  k:    1: cost:    1150   d: Exact
+---- GInc 2.0C                 k:   80: cost:     895   d: Exact
+---- GInc P 1.6                k:   80: cost:     895   d: Exact
+---- GInc P 1.6C               k:   40: cost:     721   d: Exact
+---- GInc P 2.0                k:   40: cost:     721   d: Exact
+---- GInc P 2.0C               k:  320: cost:    2517   d: Exact
+---- DiskAnn(1.4,40,10         k:    1: cost:     124   d: Exact
+DST: 0.0
+j: 138
+Query 15 (0.0):
+---- Greedy (1.2)              k:    1: cost:    1086   d: Exact
+---- Greedy (2.0)              k:    4: cost:    3065   d: Exact
+---- Greedy (2.0)C             k:   40: cost:     473   d: Exact
+---- GInc 1.6                  k:    1: cost:    2409   d: Exact
+---- GInc 1.6C                 k:   80: cost:     518   d: Exact
+---- GInc 2.0                  k:    1: cost:    2045   d: Exact
+---- GInc 2.0C                 k:  160: cost:     870   d: Exact
+---- GInc P 1.6                k:   80: cost:    2635   d: Exact
+---- GInc P 1.6C               k:   80: cost:     545   d: Exact
+---- GInc P 2.0                k:   80: cost:     545   d: Exact
+---- GInc P 2.0C               k:   40: cost:     423   d: Exact
+---- DiskAnn(1.4,40,10         k:    8: cost:     140   d: Exact
+DST: 0.0
+j: 145
+Query 16 (0.0):
+---- Greedy (1.2)              k:   80: cost:    2198   d: Exact
+---- Greedy (2.0)              k:    1: cost:    1792   d: Exact
+---- Greedy (2.0)C             k:   80: cost:     449   d: Exact
+---- GInc 1.6                  k:    1: cost:    1282   d: Exact
+---- GInc 1.6C                 k:   80: cost:     406   d: Exact
+---- GInc 2.0                  k:    1: cost:    1399   d: Exact
+---- GInc 2.0C                 k:   80: cost:     473   d: Exact
+---- GInc P 1.6                k:   80: cost:     473   d: Exact
+---- GInc P 1.6C               k:   16: cost:     178   d: Exact
+---- GInc P 2.0                k:    8: cost:    1155   d: Exact
+---- GInc P 2.0C               k:    8: cost:    1155   d: Exact
+---- DiskAnn(1.4,40,10         k:    4: cost:     138   d: Exact
+DST: 0.0
+j: 149
+Query 17 (0.0):
+---- Greedy (1.2)              k:    1: cost:     208   d: Exact
+---- Greedy (2.0)              k:    1: cost:     899   d: Exact
+---- Greedy (2.0)C             k:   80: cost:     813   d: Exact
+---- GInc 1.6                  k:    1: cost:    1251   d: Exact
+---- GInc 1.6C                 k:  160: cost:    1458   d: Exact
+---- GInc 2.0                  k:    1: cost:    1413   d: Exact
+---- GInc 2.0C                 k:  160: cost:    1255   d: Exact
+---- GInc P 1.6                k:  160: cost:    1255   d: Exact
+---- GInc P 1.6C               k:  160: cost:    1739   d: Exact
+---- GInc P 2.0                k:    1: cost:     731   d: Exact
+---- GInc P 2.0C               k:  160: cost:    1495   d: Exact
+---- DiskAnn(1.4,40,10         k:    4: cost:     140   d: Exact
+DST: 0.0
+j: 179
+Query 18 (0.0):
+---- Greedy (1.2)              k:    1: cost:    1912   d: Exact
+---- Greedy (2.0)              k:    1: cost:    1306   d: Exact
+---- Greedy (2.0)C             k:   40: cost:     389   d: Exact
+---- GInc 1.6                  k:    1: cost:     957   d: Exact
+---- GInc 1.6C                 k:   40: cost:     629   d: Exact
+---- GInc 2.0                  k:    1: cost:    1164   d: Exact
+---- GInc 2.0C                 k:   40: cost:     527   d: Exact
+---- GInc P 1.6                k:   40: cost:     527   d: Exact
+---- GInc P 1.6C               k:   80: cost:     936   d: Exact
+---- GInc P 2.0                k:   80: cost:     936   d: Exact
+---- GInc P 2.0C               k:  160: cost:    1405   d: Exact
+---- DiskAnn(1.4,40,10         k:    4: cost:     103   d: Exact
+DST: 0.0
+j: 184
+Query 19 (0.0):
+---- Greedy (1.2)              k:    1: cost:    1109   d: Exact
+---- Greedy (2.0)              k:    1: cost:    2541   d: Exact
+---- Greedy (2.0)C             k:   40: cost:     295   d: Exact
+---- GInc 1.6                  k:    1: cost:    2359   d: Exact
+---- GInc 1.6C                 k:   16: cost:     172   d: Exact
+---- GInc 2.0                  k:   40: cost:    4259   d: Exact
+---- GInc 2.0C                 k:   40: cost:     313   d: Exact
+---- GInc P 1.6                k:   20: cost:    1372   d: Exact
+---- GInc P 1.6C               k:   16: cost:     178   d: Exact
+---- GInc P 2.0                k:   40: cost:    2202   d: Exact
+---- GInc P 2.0C               k:   16: cost:     208   d: Exact
+---- DiskAnn(1.4,40,10         k:    2: cost:      53   d: Exact
+DST: 0.0
+j: 187
+Query 20 (0.0):
+---- Greedy (1.2)              k:    1: cost:     372   d: Exact
+---- Greedy (2.0)              k:    1: cost:    1038   d: Exact
+---- Greedy (2.0)C             k:    4: cost:     151   d: Exact
+---- GInc 1.6                  k:    1: cost:    1600   d: Exact
+---- GInc 1.6C                 k:   40: cost:     519   d: Exact
+---- GInc 2.0                  k:    1: cost:    1812   d: Exact
+---- GInc 2.0C                 k:   40: cost:     508   d: Exact
+---- GInc P 1.6                k:   40: cost:     508   d: Exact
+---- GInc P 1.6C               k:   80: cost:     835   d: Exact
+---- GInc P 2.0                k:    1: cost:     645   d: Exact
+---- GInc P 2.0C               k:  160: cost:    1422   d: Exact
+---- DiskAnn(1.4,40,10         k:    4: cost:     148   d: Exact
+DST: 0.0
+j: 188
+Query 21 (0.0):
+---- Greedy (1.2)              k:    1: cost:     779   d: Exact
+---- Greedy (2.0)              k:    1: cost:    2053   d: Exact
+---- Greedy (2.0)C             k:    2: cost:      73   d: Exact
+---- GInc 1.6                  k:    1: cost:    1272   d: Exact
+---- GInc 1.6C                 k:    2: cost:      79   d: Exact
+---- GInc 2.0                  k:    1: cost:    1464   d: Exact
+---- GInc 2.0C                 k:    2: cost:      84   d: Exact
+---- GInc P 1.6                k:    1: cost:     571   d: Exact
+---- GInc P 1.6C               k:    2: cost:      85   d: Exact
+---- GInc P 2.0                k:  320: cost:    1921   d: Exact
+---- GInc P 2.0C               k:    2: cost:     144   d: Exact
+---- DiskAnn(1.4,40,10         k:    8: cost:     176   d: Exact
+DST: 0.0
+j: 206
+Query 22 (0.0):
+---- Greedy (1.2)              k:    1: cost:    1271   d: Exact
+---- Greedy (2.0)              k:    1: cost:    2793   d: Exact
+---- Greedy (2.0)C             k:    8: cost:     105   d: Exact
+---- GInc 1.6                  k:    1: cost:    2650   d: Exact
+---- GInc 1.6C                 k:    2: cost:      94   d: Exact
+---- GInc 2.0                  k:    1: cost:    2603   d: Exact
+---- GInc 2.0C                 k:    8: cost:     119   d: Exact
+---- GInc P 1.6                k:   40: cost:    1697   d: Exact
+---- GInc P 1.6C               k:    1: cost:      58   d: Exact
+---- GInc P 2.0                k:   80: cost:    1815   d: Exact
+---- GInc P 2.0C               k:    4: cost:      79   d: Exact
+---- DiskAnn(1.4,40,10         k:    2: cost:      65   d: Exact
+DST: 0.0
+j: 207
+Query 23 (0.0):
+---- Greedy (1.2)              k:    2: cost:    1440   d: Exact
+---- Greedy (2.0)              k:    1: cost:    2535   d: Exact
+---- Greedy (2.0)C             k:   16: cost:     105   d: Exact
+---- GInc 1.6                  k:    1: cost:    2300   d: Exact
+---- GInc 1.6C                 k:    4: cost:      73   d: Exact
+---- GInc 2.0                  k:    1: cost:    2506   d: Exact
+---- GInc 2.0C                 k:   16: cost:     109   d: Exact
+---- GInc P 1.6                k:    1: cost:     385   d: Exact
+---- GInc P 1.6C               k:    1: cost:      46   d: Exact
+---- GInc P 2.0                k:    1: cost:     515   d: Exact
+---- GInc P 2.0C               k:   80: cost:     290   d: Exact
+---- DiskAnn(1.4,40,10         k:    2: cost:      63   d: Exact
+DST: 0.0
+j: 223
+Query 24 (0.0):
+---- Greedy (1.2)              k:    1: cost:     331   d: Exact
+---- Greedy (2.0)              k:    1: cost:    1034   d: Exact
+---- Greedy (2.0)C             k:    1: cost:    1034   d: Exact
+---- GInc 1.6                  k:    1: cost:     978   d: Exact
+---- GInc 1.6C                 k:  320: cost:    1108   d: Exact
+---- GInc 2.0                  k:    1: cost:    1083   d: Exact
+---- GInc 2.0C                 k:    1: cost:    1083   d: Exact
+---- GInc P 1.6                k:    1: cost:    1083   d: Exact
+---- GInc P 1.6C               k:   40: cost:     334   d: Exact
+---- GInc P 2.0                k:   40: cost:     334   d: Exact
+---- GInc P 2.0C               k:    8: cost:     119   d: Exact
+---- DiskAnn(1.4,40,10         k:    4: cost:     127   d: Exact
+DST: 0.0
+j: 244
+Query 25 (0.0):
+---- Greedy (1.2)              k:    1: cost:    1226   d: Exact
+---- Greedy (2.0)              k:    1: cost:    1860   d: Exact
+---- Greedy (2.0)C             k:    8: cost:     116   d: Exact
+---- GInc 1.6                  k:   80: cost:    3958   d: Exact
+---- GInc 1.6C                 k:   16: cost:     153   d: Exact
+---- GInc 2.0                  k:    1: cost:    2463   d: Exact
+---- GInc 2.0C                 k:   16: cost:     182   d: Exact
+---- GInc P 1.6                k:    1: cost:     861   d: Exact
+---- GInc P 1.6C               k:    1: cost:      57   d: Exact
+---- GInc P 2.0                k:    1: cost:     595   d: Exact
+---- GInc P 2.0C               k:    1: cost:      59   d: Exact
+---- DiskAnn(1.4,40,10         k:    8: cost:     166   d: Exact
+DST: 0.0
+j: 248
+Query 26 (0.0):
+---- Greedy (1.2)              k:    1: cost:    1119   d: Exact
+---- Greedy (2.0)              k:    1: cost:    2505   d: Exact
+---- Greedy (2.0)C             k:    8: cost:     141   d: Exact
+---- GInc 1.6                  k:    1: cost:    1791   d: Exact
+---- GInc 1.6C                 k:    8: cost:      90   d: Exact
+---- GInc 2.0                  k:    1: cost:    1900   d: Exact
+---- GInc 2.0C                 k:    8: cost:      95   d: Exact
+---- GInc P 1.6                k:    8: cost:     824   d: Exact
+---- GInc P 1.6C               k:    2: cost:      56   d: Exact
+---- GInc P 2.0                k:   16: cost:    1047   d: Exact
+---- GInc P 2.0C               k:    8: cost:      89   d: Exact
+---- DiskAnn(1.4,40,10         k:    4: cost:      60   d: Exact
+DST: 0.0
+j: 266
+Query 27 (0.0):
+---- Greedy (1.2)              k:    1: cost:    1116   d: Exact
+---- Greedy (2.0)              k:    1: cost:    2696   d: Exact
+---- Greedy (2.0)C             k:    8: cost:     104   d: Exact
+---- GInc 1.6                  k:    1: cost:    2363   d: Exact
+---- GInc 1.6C                 k:   16: cost:     156   d: Exact
+---- GInc 2.0                  k:    1: cost:    2679   d: Exact
+---- GInc 2.0C                 k:   16: cost:     159   d: Exact
+---- GInc P 1.6                k:    1: cost:     437   d: Exact
+---- GInc P 1.6C               k:    1: cost:      57   d: Exact
+---- GInc P 2.0                k:  320: cost:    3416   d: Exact
+---- GInc P 2.0C               k:   16: cost:     141   d: Exact
+---- DiskAnn(1.4,40,10         k:    1: cost:      57   d: Exact
+DST: 0.0
+j: 270
+Query 28 (0.0):
+---- Greedy (1.2)              k:    2: cost:     838   d: Exact
+---- Greedy (2.0)              k:    1: cost:    1650   d: Exact
+---- Greedy (2.0)C             k:   16: cost:     224   d: Exact
+---- GInc 1.6                  k:    1: cost:    2082   d: Exact
+---- GInc 1.6C                 k:   16: cost:     207   d: Exact
+---- GInc 2.0                  k:    1: cost:    2351   d: Exact
+---- GInc 2.0C                 k:   20: cost:     279   d: Exact
+---- GInc P 1.6                k:    1: cost:     297   d: Exact
+---- GInc P 1.6C               k:    8: cost:     177   d: Exact
+---- GInc P 2.0                k:  320: cost:    2973   d: Exact
+---- GInc P 2.0C               k:   20: cost:     256   d: Exact
+---- DiskAnn(1.4,40,10         k:    4: cost:     138   d: Exact
+DST: 0.0
+j: 282
+Query 29 (0.0):
+---- Greedy (1.2)              k:    1: cost:    1223   d: Exact
+---- Greedy (2.0)              k:  160: cost:    6250   d: Exact
+---- Greedy (2.0)C             k:  160: cost:     724   d: Exact
+---- GInc 1.6                  k:  320: cost:    6904   d: Exact
+---- GInc 1.6C                 k:  160: cost:     773   d: Exact
+---- GInc 2.0                  k:    2: cost:    2488   d: Exact
+---- GInc 2.0C                 k:  160: cost:     736   d: Exact
+---- GInc P 1.6                k: 1000: cost:    6826   d: Exact
+---- GInc P 1.6C               k:  160: cost:     765   d: Exact
+---- GInc P 2.0                k:    1: cost:     606   d: Exact
+---- GInc P 2.0C               k:    1: cost:      52   d: Exact
+---- DiskAnn(1.4,40,10         k:    8: cost:     150   d: Exact
+DST: 0.0
+j: 285
+Query 30 (0.0):
+---- Greedy (1.2)              k:    1: cost:    1200   d: Exact
+---- Greedy (2.0)              k:    1: cost:    1235   d: Exact
+---- Greedy (2.0)C             k:    1: cost:      77   d: Exact
+---- GInc 1.6                  k:    1: cost:     581   d: Exact
+---- GInc 1.6C                 k:    2: cost:      91   d: Exact
+---- GInc 2.0                  k:    1: cost:     734   d: Exact
+---- GInc 2.0C                 k:    1: cost:      79   d: Exact
+---- GInc P 1.6                k:   16: cost:     530   d: Exact
+---- GInc P 1.6C               k:    1: cost:      81   d: Exact
+---- GInc P 2.0                k:   16: cost:     676   d: Exact
+---- GInc P 2.0C               k:    1: cost:      80   d: Exact
+---- DiskAnn(1.4,40,10         k:    1: cost:      73   d: Exact
+DST: 0.0
+j: 290
+Query 31 (0.0):
+---- Greedy (1.2)              k:    1: cost:    1088   d: Exact
+---- Greedy (2.0)              k:    1: cost:    2177   d: Exact
+---- Greedy (2.0)C             k:  160: cost:     577   d: Exact
+---- GInc 1.6                  k:    1: cost:    2007   d: Exact
+---- GInc 1.6C                 k:  320: cost:    1081   d: Exact
+---- GInc 2.0                  k:    1: cost:    2141   d: Exact
+---- GInc 2.0C                 k:  160: cost:     640   d: Exact
+---- GInc P 1.6                k:  160: cost:    2788   d: Exact
+---- GInc P 1.6C               k:   80: cost:     391   d: Exact
+---- GInc P 2.0                k:  160: cost:    3215   d: Exact
+---- GInc P 2.0C               k:   80: cost:     389   d: Exact
+---- DiskAnn(1.4,40,10         k:   16: cost:     151   d: Exact
+DST: 0.0
+j: 305
+Query 32 (0.0):
+---- Greedy (1.2)              k:    1: cost:    1112   d: Exact
+---- Greedy (2.0)              k:    1: cost:    1686   d: Exact
+---- Greedy (2.0)C             k:    8: cost:     149   d: Exact
+---- GInc 1.6                  k:   80: cost:    4988   d: Exact
+---- GInc 1.6C                 k:   40: cost:     355   d: Exact
+---- GInc 2.0                  k:    1: cost:    1409   d: Exact
+---- GInc 2.0C                 k:   16: cost:     152   d: Exact
+---- GInc P 1.6                k:   16: cost:     152   d: Exact
+---- GInc P 1.6C               k:   80: cost:     531   d: Exact
+---- GInc P 2.0                k:    8: cost:     720   d: Exact
+---- GInc P 2.0C               k:    8: cost:     720   d: Exact
+---- DiskAnn(1.4,40,10         k:    4: cost:      93   d: Exact
+DST: 0.0
+j: 341
+Query 33 (0.0):
+---- Greedy (1.2)              k:    1: cost:    1063   d: Exact
+---- Greedy (2.0)              k:    1: cost:    2288   d: Exact
+---- Greedy (2.0)C             k:    1: cost:      37   d: Exact
+---- GInc 1.6                  k:    1: cost:    1806   d: Exact
+---- GInc 1.6C                 k:    1: cost:      38   d: Exact
+---- GInc 2.0                  k:    1: cost:    1922   d: Exact
+---- GInc 2.0C                 k:    1: cost:      37   d: Exact
+---- GInc P 1.6                k:    1: cost:     239   d: Exact
+---- GInc P 1.6C               k:    1: cost:      34   d: Exact
+---- GInc P 2.0                k:    1: cost:     274   d: Exact
+---- GInc P 2.0C               k:    1: cost:      37   d: Exact
+---- DiskAnn(1.4,40,10         k:    1: cost:      30   d: Exact
+DST: 0.0
+j: 343
+Query 34 (0.0):
+---- Greedy (1.2)              k:    1: cost:    1176   d: Exact
+---- Greedy (2.0)              k:    1: cost:     676   d: Exact
+---- Greedy (2.0)C             k:   80: cost:    1004   d: Exact
+---- GInc 1.6                  k:    1: cost:     620   d: Exact
+---- GInc 1.6C                 k:   16: cost:     379   d: Exact
+---- GInc 2.0                  k:    1: cost:     701   d: Exact
+---- GInc 2.0C                 k:   16: cost:     299   d: Exact
+---- GInc P 1.6                k:   16: cost:     299   d: Exact
+---- GInc P 1.6C               k:   80: cost:     976   d: Exact
+---- GInc P 2.0                k:   80: cost:     976   d: Exact
+---- GInc P 2.0C               k:   16: cost:     318   d: Exact
+---- DiskAnn(1.4,40,10         k:    2: cost:     108   d: Exact
+DST: 0.0
+j: 349
+Query 35 (0.0):
+---- Greedy (1.2)              k:    1: cost:    1157   d: Exact
+---- Greedy (2.0)              k:    1: cost:    2537   d: Exact
+---- Greedy (2.0)C             k:  160: cost:     724   d: Exact
+---- GInc 1.6                  k:    1: cost:    1519   d: Exact
+---- GInc 1.6C                 k:    8: cost:     100   d: Exact
+---- GInc 2.0                  k:    1: cost:    1654   d: Exact
+---- GInc 2.0C                 k:    1: cost:      43   d: Exact
+---- GInc P 1.6                k:    1: cost:      43   d: Exact
+---- GInc P 1.6C               k:    2: cost:      64   d: Exact
+---- GInc P 2.0                k:    2: cost:      64   d: Exact
+---- GInc P 2.0C               k:    1: cost:      48   d: Exact
+---- DiskAnn(1.4,40,10         k:    1: cost:      38   d: Exact
+DST: 0.0
+j: 368
+Query 36 (0.0):
+---- Greedy (1.2)              k:   40: cost:    1111   d: Exact
+---- Greedy (2.0)              k:    1: cost:    1025   d: Exact
+---- Greedy (2.0)C             k:   40: cost:     679   d: Exact
+---- GInc 1.6                  k:    1: cost:    1199   d: Exact
+---- GInc 1.6C                 k:   40: cost:     709   d: Exact
+---- GInc 2.0                  k:    1: cost:    1374   d: Exact
+---- GInc 2.0C                 k:   40: cost:     691   d: Exact
+---- GInc P 1.6                k:   40: cost:     691   d: Exact
+---- GInc P 1.6C               k:   16: cost:     495   d: Exact
+---- GInc P 2.0                k:   16: cost:     495   d: Exact
+---- GInc P 2.0C               k:   16: cost:     339   d: Exact
+---- DiskAnn(1.4,40,10         k:    8: cost:     197   d: Exact
+DST: 0.0
+j: 369
+Query 37 (0.0):
+---- Greedy (1.2)              k:    1: cost:    1404   d: Exact
+---- Greedy (2.0)              k:    1: cost:    1371   d: Exact
+---- Greedy (2.0)C             k:   80: cost:    1005   d: Exact
+---- GInc 1.6                  k:    1: cost:    1078   d: Exact
+---- GInc 1.6C                 k:  160: cost:    1740   d: Exact
+---- GInc 2.0                  k:    1: cost:    1248   d: Exact
+---- GInc 2.0C                 k:   80: cost:     969   d: Exact
+---- GInc P 1.6                k:   80: cost:     969   d: Exact
+---- GInc P 1.6C               k:  160: cost:    1849   d: Exact
+---- GInc P 2.0                k:  160: cost:    1849   d: Exact
+---- GInc P 2.0C               k:  160: cost:    1808   d: Exact
+---- DiskAnn(1.4,40,10         k:    8: cost:     294   d: Exact
+DST: 0.0
+j: 372
+Query 38 (0.0):
+---- Greedy (1.2)              k:    1: cost:    1253   d: Exact
+---- Greedy (2.0)              k:    1: cost:    1027   d: Exact
+---- Greedy (2.0)C             k:    8: cost:     158   d: Exact
+---- GInc 1.6                  k:    1: cost:     564   d: Exact
+---- GInc 1.6C                 k:   40: cost:     430   d: Exact
+---- GInc 2.0                  k:    1: cost:     832   d: Exact
+---- GInc 2.0C                 k:   80: cost:     968   d: Exact
+---- GInc P 1.6                k: 1000: cost:    6666   d: Exact
+---- GInc P 1.6C               k:   40: cost:     511   d: Exact
+---- GInc P 2.0                k:   40: cost:     511   d: Exact
+---- GInc P 2.0C               k:  160: cost:    1519   d: Exact
+---- DiskAnn(1.4,40,10         k:    8: cost:     234   d: Exact
+DST: 0.0
+j: 373
+Query 39 (0.0):
+---- Greedy (1.2)              k:    1: cost:    1171   d: Exact
+---- Greedy (2.0)              k:    1: cost:    1353   d: Exact
+---- Greedy (2.0)C             k:    4: cost:      95   d: Exact
+---- GInc 1.6                  k:    1: cost:    1067   d: Exact
+---- GInc 1.6C                 k:    8: cost:     166   d: Exact
+---- GInc 2.0                  k:    1: cost:    1139   d: Exact
+---- GInc 2.0C                 k:    8: cost:     150   d: Exact
+---- GInc P 1.6                k:    8: cost:     150   d: Exact
+---- GInc P 1.6C               k:    4: cost:     108   d: Exact
+---- GInc P 2.0                k:    4: cost:     108   d: Exact
+---- GInc P 2.0C               k:    4: cost:      91   d: Exact
+---- DiskAnn(1.4,40,10         k:    2: cost:      53   d: Exact
+DST: 0.0
+j: 379
+Query 40 (0.0):
+---- Greedy (1.2)              k:    1: cost:    1321   d: Exact
+---- Greedy (2.0)              k:    1: cost:    1975   d: Exact
+---- Greedy (2.0)C             k:    4: cost:      86   d: Exact
+---- GInc 1.6                  k:    1: cost:    1274   d: Exact
+---- GInc 1.6C                 k:    4: cost:      86   d: Exact
+---- GInc 2.0                  k:    1: cost:    1460   d: Exact
+---- GInc 2.0C                 k:    1: cost:      58   d: Exact
+---- GInc P 1.6                k:    1: cost:     307   d: Exact
+---- GInc P 1.6C               k:    4: cost:      83   d: Exact
+---- GInc P 2.0                k:   16: cost:     669   d: Exact
+---- GInc P 2.0C               k:    1: cost:      57   d: Exact
+---- DiskAnn(1.4,40,10         k:    4: cost:     102   d: Exact
+DST: 0.0
+j: 390
+Query 41 (0.0):
+---- Greedy (1.2)              k:    1: cost:    1130   d: Exact
+---- Greedy (2.0)              k:    1: cost:    2616   d: Exact
+---- Greedy (2.0)C             k:    4: cost:     102   d: Exact
+---- GInc 1.6                  k:    1: cost:    2261   d: Exact
+---- GInc 1.6C                 k:    8: cost:     123   d: Exact
+---- GInc 2.0                  k:    1: cost:    2517   d: Exact
+---- GInc 2.0C                 k:    4: cost:     101   d: Exact
+---- GInc P 1.6                k:    1: cost:     400   d: Exact
+---- GInc P 1.6C               k:    1: cost:      68   d: Exact
+---- GInc P 2.0                k:    1: cost:     500   d: Exact
+---- GInc P 2.0C               k:   40: cost:     448   d: Exact
+---- DiskAnn(1.4,40,10         k:    8: cost:     120   d: Exact
+DST: 0.0
+j: 400
+Query 42 (0.0):
+---- Greedy (1.2)              k:   16: cost:     420   d: Exact
+---- Greedy (2.0)              k:    1: cost:    1073   d: Exact
+---- Greedy (2.0)C             k:   16: cost:     217   d: Exact
+---- GInc 1.6                  k:    1: cost:    1111   d: Exact
+---- GInc 1.6C                 k:   80: cost:     590   d: Exact
+---- GInc 2.0                  k:    1: cost:    1288   d: Exact
+---- GInc 2.0C                 k:   40: cost:     421   d: Exact
+---- GInc P 1.6                k:   40: cost:     421   d: Exact
+---- GInc P 1.6C               k:   80: cost:     727   d: Exact
+---- GInc P 2.0                k:    1: cost:    1193   d: Exact
+---- GInc P 2.0C               k:  160: cost:     893   d: Exact
+---- DiskAnn(1.4,40,10         k:    8: cost:     166   d: Exact
+DST: 0.0
+j: 409
+Query 43 (0.0):
+---- Greedy (1.2)              k:  160: cost:    3075   d: Exact
+---- Greedy (2.0)              k:  160: cost:    6889   d: Exact
+---- Greedy (2.0)C             k:   80: cost:     441   d: Exact
+---- GInc 1.6                  k:    1: cost:    1754   d: Exact
+---- GInc 1.6C                 k:  160: cost:     763   d: Exact
+---- GInc 2.0                  k:   80: cost:    4913   d: Exact
+---- GInc 2.0C                 k:   80: cost:     424   d: Exact
+---- GInc P 1.6                k: 1000: cost:    6696   d: Exact
+---- GInc P 1.6C               k:   40: cost:     324   d: Exact
+---- GInc P 2.0                k:   40: cost:     324   d: Exact
+---- GInc P 2.0C               k:   80: cost:     469   d: Exact
+---- DiskAnn(1.4,40,10         k:    2: cost:      99   d: Exact
+DST: 0.0
+j: 419
+Query 44 (0.0):
+---- Greedy (1.2)              k:    1: cost:    1327   d: Exact
+---- Greedy (2.0)              k:    1: cost:    3022   d: Exact
+---- Greedy (2.0)C             k:    1: cost:      57   d: Exact
+---- GInc 1.6                  k:    1: cost:    2481   d: Exact
+---- GInc 1.6C                 k:  320: cost:    1472   d: Exact
+---- GInc 2.0                  k:    1: cost:    2619   d: Exact
+---- GInc 2.0C                 k:   40: cost:     376   d: Exact
+---- GInc P 1.6                k: 1000: cost:    7288   d: Exact
+---- GInc P 1.6C               k:   40: cost:     380   d: Exact
+---- GInc P 2.0                k:  320: cost:    6157   d: Exact
+---- GInc P 2.0C               k:  160: cost:     888   d: Exact
+---- DiskAnn(1.4,40,10         k:    4: cost:      86   d: Exact
+DST: 0.0
+j: 425
+Query 45 (0.0):
+---- Greedy (1.2)              k:    1: cost:    1488   d: Exact
+---- Greedy (2.0)              k:    1: cost:    3501   d: Exact
+---- Greedy (2.0)C             k: 1000: cost:    2435   d: Exact
+---- GInc 1.6                  k:    1: cost:     799   d: Exact
+---- GInc 1.6C                 k:  160: cost:     707   d: Exact
+---- GInc 2.0                  k:    1: cost:     942   d: Exact
+---- GInc 2.0C                 k:  160: cost:     849   d: Exact
+---- GInc P 1.6                k:  160: cost:     849   d: Exact
+---- GInc P 1.6C               k:   80: cost:     528   d: Exact
+---- GInc P 2.0                k:   80: cost:     528   d: Exact
+---- GInc P 2.0C               k:   16: cost:     343   d: Exact
+---- DiskAnn(1.4,40,10         k:   80: cost:     506   d: Exact
+DST: 0.0
+j: 432
+Query 46 (0.0):
+---- Greedy (1.2)              k:    1: cost:    1278   d: Exact
+---- Greedy (2.0)              k:    1: cost:    1014   d: Exact
+---- Greedy (2.0)C             k:    1: cost:      54   d: Exact
+---- GInc 1.6                  k:    1: cost:    1234   d: Exact
+---- GInc 1.6C                 k:    1: cost:      55   d: Exact
+---- GInc 2.0                  k:    1: cost:    1406   d: Exact
+---- GInc 2.0C                 k:    8: cost:     142   d: Exact
+---- GInc P 1.6                k:    8: cost:     142   d: Exact
+---- GInc P 1.6C               k:    1: cost:      56   d: Exact
+---- GInc P 2.0                k: 1000: cost:    6024   d: Exact
+---- GInc P 2.0C               k:   16: cost:     202   d: Exact
+---- DiskAnn(1.4,40,10         k:    2: cost:     109   d: Exact
+DST: 0.0
+j: 439
+Query 47 (0.0):
+---- Greedy (1.2)              k:    1: cost:     305   d: Exact
+---- Greedy (2.0)              k:    1: cost:     989   d: Exact
+---- Greedy (2.0)C             k:   40: cost:     624   d: Exact
+---- GInc 1.6                  k:    1: cost:     897   d: Exact
+---- GInc 1.6C                 k:    8: cost:     234   d: Exact
+---- GInc 2.0                  k:    1: cost:     966   d: Exact
+---- GInc 2.0C                 k:   40: cost:     557   d: Exact
+---- GInc P 1.6                k: 1000: cost:    2659   d: Exact
+---- GInc P 1.6C               k:    8: cost:     240   d: Exact
+---- GInc P 2.0                k:    8: cost:     240   d: Exact
+---- GInc P 2.0C               k:    8: cost:     253   d: Exact
+---- DiskAnn(1.4,40,10         k:    1: cost:     116   d: Exact
+DST: 0.0
+j: 469
+Query 48 (0.0):
+---- Greedy (1.2)              k:    1: cost:    1211   d: Exact
+---- Greedy (2.0)              k:    1: cost:    1277   d: Exact
+---- Greedy (2.0)C             k:   40: cost:     788   d: Exact
+---- GInc 1.6                  k:    1: cost:     684   d: Exact
+---- GInc 1.6C                 k:   40: cost:     669   d: Exact
+---- GInc 2.0                  k:    1: cost:     751   d: Exact
+---- GInc 2.0C                 k:   40: cost:     767   d: Exact
+---- GInc P 1.6                k:   40: cost:     767   d: Exact
+---- GInc P 1.6C               k:   40: cost:     608   d: Exact
+---- GInc P 2.0                k:   40: cost:     608   d: Exact
+---- GInc P 2.0C               k:   20: cost:     460   d: Exact
+---- DiskAnn(1.4,40,10         k:    2: cost:     104   d: Exact
+DST: 0.0
+j: 477
+Query 49 (0.0):
+---- Greedy (1.2)              k:    1: cost:     593   d: Exact
+---- Greedy (2.0)              k:    1: cost:    1276   d: Exact
+---- Greedy (2.0)C             k:   40: cost:     316   d: Exact
+---- GInc 1.6                  k:    1: cost:    1157   d: Exact
+---- GInc 1.6C                 k:   16: cost:     181   d: Exact
+---- GInc 2.0                  k:    1: cost:    1258   d: Exact
+---- GInc 2.0C                 k:    4: cost:      81   d: Exact
+---- GInc P 1.6                k:    4: cost:      81   d: Exact
+---- GInc P 1.6C               k:   16: cost:     176   d: Exact
+---- GInc P 2.0                k:   16: cost:     176   d: Exact
+---- GInc P 2.0C               k:    4: cost:      84   d: Exact
+---- DiskAnn(1.4,40,10         k:    8: cost:     133   d: Exact
+DST: 0.0
+j: 478
+Query 50 (0.0):
+---- Greedy (1.2)              k:    1: cost:    1116   d: Exact
+---- Greedy (2.0)              k:    1: cost:    2511   d: Exact
+---- Greedy (2.0)C             k:    8: cost:      64   d: Exact
+---- GInc 1.6                  k:    1: cost:    2303   d: Exact
+---- GInc 1.6C                 k:    1: cost:      32   d: Exact
+---- GInc 2.0                  k:    1: cost:    2500   d: Exact
+---- GInc 2.0C                 k:    8: cost:      62   d: Exact
+---- GInc P 1.6                k:    1: cost:     432   d: Exact
+---- GInc P 1.6C               k:    1: cost:      34   d: Exact
+---- GInc P 2.0                k:    1: cost:     563   d: Exact
+---- GInc P 2.0C               k:    1: cost:      30   d: Exact
+---- DiskAnn(1.4,40,10         k:    1: cost:      31   d: Exact
+DST: 0.0
+j: 487
+Query 51 (0.0):
+---- Greedy (1.2)              k:    1: cost:     357   d: Exact
+---- Greedy (2.0)              k:    1: cost:     887   d: Exact
+---- Greedy (2.0)C             k:    2: cost:      82   d: Exact
+---- GInc 1.6                  k:    1: cost:     883   d: Exact
+---- GInc 1.6C                 k:    2: cost:      82   d: Exact
+---- GInc 2.0                  k:    1: cost:    1472   d: Exact
+---- GInc 2.0C                 k:    2: cost:      84   d: Exact
+---- GInc P 1.6                k:    2: cost:      84   d: Exact
+---- GInc P 1.6C               k:    2: cost:      87   d: Exact
+---- GInc P 2.0                k:    2: cost:      87   d: Exact
+---- GInc P 2.0C               k:    2: cost:      85   d: Exact
+---- DiskAnn(1.4,40,10         k:    2: cost:      78   d: Exact
+DST: 0.0
+j: 520
+Query 52 (0.0):
+---- Greedy (1.2)              k:    1: cost:     457   d: Exact
+---- Greedy (2.0)              k:    1: cost:    1178   d: Exact
+---- Greedy (2.0)C             k:   16: cost:     213   d: Exact
+---- GInc 1.6                  k:    1: cost:     547   d: Exact
+---- GInc 1.6C                 k:    8: cost:     156   d: Exact
+---- GInc 2.0                  k:    1: cost:     695   d: Exact
+---- GInc 2.0C                 k:    8: cost:     178   d: Exact
+---- GInc P 1.6                k:    1: cost:     706   d: Exact
+---- GInc P 1.6C               k:    8: cost:     134   d: Exact
+---- GInc P 2.0                k:    1: cost:     611   d: Exact
+---- GInc P 2.0C               k:   16: cost:     222   d: Exact
+---- DiskAnn(1.4,40,10         k:    4: cost:      97   d: Exact
+DST: 0.0
+j: 521
+Query 53 (0.0):
+---- Greedy (1.2)              k:    1: cost:    1297   d: Exact
+---- Greedy (2.0)              k:    1: cost:    2160   d: Exact
+---- Greedy (2.0)C             k:   16: cost:     174   d: Exact
+---- GInc 1.6                  k:    1: cost:    3047   d: Exact
+---- GInc 1.6C                 k:    4: cost:      98   d: Exact
+---- GInc 2.0                  k:    1: cost:    1497   d: Exact
+---- GInc 2.0C                 k:    1: cost:      75   d: Exact
+---- GInc P 1.6                k:    1: cost:     736   d: Exact
+---- GInc P 1.6C               k:    1: cost:      71   d: Exact
+---- GInc P 2.0                k:    1: cost:     631   d: Exact
+---- GInc P 2.0C               k:    1: cost:      70   d: Exact
+---- DiskAnn(1.4,40,10         k:    4: cost:     139   d: Exact
+DST: 0.0
+j: 537
+Query 54 (0.0):
+---- Greedy (1.2)              k:    1: cost:    1314   d: Exact
+---- Greedy (2.0)              k:    1: cost:    2379   d: Exact
+---- Greedy (2.0)C             k:    8: cost:     100   d: Exact
+---- GInc 1.6                  k:    1: cost:    2630   d: Exact
+---- GInc 1.6C                 k:    1: cost:      50   d: Exact
+---- GInc 2.0                  k:    1: cost:    1642   d: Exact
+---- GInc 2.0C                 k:    8: cost:     111   d: Exact
+---- GInc P 1.6                k:    1: cost:     403   d: Exact
+---- GInc P 1.6C               k:    1: cost:      63   d: Exact
+---- GInc P 2.0                k:    1: cost:     396   d: Exact
+---- GInc P 2.0C               k:    8: cost:     106   d: Exact
+---- DiskAnn(1.4,40,10         k:    1: cost:      66   d: Exact
+DST: 0.0
+j: 571
+Query 55 (0.0):
+---- Greedy (1.2)              k:    1: cost:     309   d: Exact
+---- Greedy (2.0)              k:    1: cost:    1093   d: Exact
+---- Greedy (2.0)C             k:   40: cost:     173   d: Exact
+---- GInc 1.6                  k:    1: cost:    1059   d: Exact
+---- GInc 1.6C                 k:   80: cost:     429   d: Exact
+---- GInc 2.0                  k:    1: cost:    1227   d: Exact
+---- GInc 2.0C                 k:   16: cost:     229   d: Exact
+---- GInc P 1.6                k:   16: cost:     229   d: Exact
+---- GInc P 1.6C               k:   80: cost:     494   d: Exact
+---- GInc P 2.0                k:    8: cost:    1028   d: Exact
+---- GInc P 2.0C               k:   80: cost:     533   d: Exact
+---- DiskAnn(1.4,40,10         k:    4: cost:     205   d: Exact
+DST: 0.0
+j: 576
+Query 56 (0.0):
+---- Greedy (1.2)              k:    1: cost:     314   d: Exact
+---- Greedy (2.0)              k:    1: cost:     804   d: Exact
+---- Greedy (2.0)C             k:   40: cost:     600   d: Exact
+---- GInc 1.6                  k:    1: cost:     702   d: Exact
+---- GInc 1.6C                 k:   40: cost:     472   d: Exact
+---- GInc 2.0                  k:    1: cost:     840   d: Exact
+---- GInc 2.0C                 k:   40: cost:     507   d: Exact
+---- GInc P 1.6                k:  320: cost:     969   d: Exact
+---- GInc P 1.6C               k:   40: cost:     489   d: Exact
+---- GInc P 2.0                k:   20: cost:    1434   d: Exact
+---- GInc P 2.0C               k:  320: cost:    2090   d: Exact
+---- DiskAnn(1.4,40,10         k:    2: cost:     118   d: Exact
+DST: 0.0
+j: 595
+Query 57 (0.0):
+---- Greedy (1.2)              k:    1: cost:    1276   d: Exact
+---- Greedy (2.0)              k:    1: cost:    2310   d: Exact
+---- Greedy (2.0)C             k:  160: cost:     469   d: Exact
+---- GInc 1.6                  k:    1: cost:    2409   d: Exact
+---- GInc 1.6C                 k:   16: cost:     175   d: Exact
+---- GInc 2.0                  k:    1: cost:    2778   d: Exact
+---- GInc 2.0C                 k:   80: cost:     335   d: Exact
+---- GInc P 1.6                k:    1: cost:     778   d: Exact
+---- GInc P 1.6C               k:   16: cost:     202   d: Exact
+---- GInc P 2.0                k:    1: cost:     709   d: Exact
+---- GInc P 2.0C               k:   80: cost:     365   d: Exact
+---- DiskAnn(1.4,40,10         k:    2: cost:      63   d: Exact
+DST: 0.0
+j: 605
+Query 58 (0.0):
+---- Greedy (1.2)              k:    1: cost:     674   d: Exact
+---- Greedy (2.0)              k:    1: cost:    1179   d: Exact
+---- Greedy (2.0)C             k:   40: cost:     547   d: Exact
+---- GInc 1.6                  k:    1: cost:     956   d: Exact
+---- GInc 1.6C                 k:    8: cost:     261   d: Exact
+---- GInc 2.0                  k:    1: cost:    2176   d: Exact
+---- GInc 2.0C                 k:   40: cost:     510   d: Exact
+---- GInc P 1.6                k:   40: cost:     510   d: Exact
+---- GInc P 1.6C               k:   16: cost:     501   d: Exact
+---- GInc P 2.0                k:    1: cost:     790   d: Exact
+---- GInc P 2.0C               k:   80: cost:    1029   d: Exact
+---- DiskAnn(1.4,40,10         k:    8: cost:     201   d: Exact
+DST: 0.0
+j: 606
+Query 59 (0.0):
+---- Greedy (1.2)              k:    1: cost:    1128   d: Exact
+---- Greedy (2.0)              k:    1: cost:    2561   d: Exact
+---- Greedy (2.0)C             k:   16: cost:     233   d: Exact
+---- GInc 1.6                  k:    1: cost:    2440   d: Exact
+---- GInc 1.6C                 k:    4: cost:     121   d: Exact
+---- GInc 2.0                  k:    1: cost:    2588   d: Exact
+---- GInc 2.0C                 k:    8: cost:     160   d: Exact
+---- GInc P 1.6                k:    8: cost:     160   d: Exact
+---- GInc P 1.6C               k:   16: cost:     263   d: Exact
+---- GInc P 2.0                k:   16: cost:     263   d: Exact
+---- GInc P 2.0C               k:   80: cost:     617   d: Exact
+---- DiskAnn(1.4,40,10         k:    8: cost:     205   d: Exact
+DST: 0.0
+j: 611
+Query 60 (0.0):
+---- Greedy (1.2)              k:    1: cost:    1476   d: Exact
+---- Greedy (2.0)              k:    1: cost:    3477   d: Exact
+---- Greedy (2.0)C             k:    8: cost:     216   d: Exact
+---- GInc 1.6                  k:   80: cost:    1316   d: Exact
+---- GInc 1.6C                 k:   16: cost:     333   d: Exact
+---- GInc 2.0                  k:    1: cost:    1080   d: Exact
+---- GInc 2.0C                 k:    8: cost:     237   d: Exact
+---- GInc P 1.6                k:    8: cost:     237   d: Exact
+---- GInc P 1.6C               k:    4: cost:     215   d: Exact
+---- GInc P 2.0                k:    4: cost:     215   d: Exact
+---- GInc P 2.0C               k:   16: cost:     369   d: Exact
+---- DiskAnn(1.4,40,10         k:    4: cost:     160   d: Exact
+DST: 0.0
+j: 622
+Query 61 (0.0):
+---- Greedy (1.2)              k:    1: cost:    1251   d: Exact
+---- Greedy (2.0)              k:    1: cost:    2835   d: Exact
+---- Greedy (2.0)C             k:  160: cost:     745   d: Exact
+---- GInc 1.6                  k: 1000: cost:    9798   d: Exact
+---- GInc 1.6C                 k:    2: cost:     140   d: Exact
+---- GInc 2.0                  k:    1: cost:    2587   d: Exact
+---- GInc 2.0C                 k:   40: cost:     335   d: Exact
+---- GInc P 1.6                k:   40: cost:     335   d: Exact
+---- GInc P 1.6C               k:    8: cost:     165   d: Exact
+---- GInc P 2.0                k:    8: cost:     165   d: Exact
+---- GInc P 2.0C               k:  320: cost:    1318   d: Exact
+---- DiskAnn(1.4,40,10         k:    8: cost:     202   d: Exact
+DST: 0.0
+j: 626
+Query 62 (0.0):
+---- Greedy (1.2)              k:    1: cost:    1318   d: Exact
+---- Greedy (2.0)              k:    1: cost:    1003   d: Exact
+---- Greedy (2.0)C             k:    2: cost:      69   d: Exact
+---- GInc 1.6                  k:    1: cost:    1741   d: Exact
+---- GInc 1.6C                 k:    4: cost:      96   d: Exact
+---- GInc 2.0                  k:    1: cost:    2717   d: Exact
+---- GInc 2.0C                 k:    4: cost:     103   d: Exact
+---- GInc P 1.6                k:    1: cost:     482   d: Exact
+---- GInc P 1.6C               k:    1: cost:      47   d: Exact
+---- GInc P 2.0                k:    1: cost:      47   d: Exact
+---- GInc P 2.0C               k:    2: cost:      81   d: Exact
+---- DiskAnn(1.4,40,10         k:    8: cost:     124   d: Exact
+DST: 0.0
+j: 628
+Query 63 (0.0):
+---- Greedy (1.2)              k:    1: cost:     112   d: Exact
+---- Greedy (2.0)              k:    1: cost:     534   d: Exact
+---- Greedy (2.0)C             k:    2: cost:      96   d: Exact
+---- GInc 1.6                  k:    1: cost:     403   d: Exact
+---- GInc 1.6C                 k:    4: cost:     110   d: Exact
+---- GInc 2.0                  k:    1: cost:     498   d: Exact
+---- GInc 2.0C                 k:    4: cost:     121   d: Exact
+---- GInc P 1.6                k:    1: cost:     351   d: Exact
+---- GInc P 1.6C               k:    1: cost:      81   d: Exact
+---- GInc P 2.0                k:    1: cost:     398   d: Exact
+---- GInc P 2.0C               k:    4: cost:     106   d: Exact
+---- DiskAnn(1.4,40,10         k:    1: cost:      63   d: Exact
+DST: 0.0
+j: 639
+Query 64 (0.0):
+---- Greedy (1.2)              k:    1: cost:    1195   d: Exact
+---- Greedy (2.0)              k:    1: cost:    1815   d: Exact
+---- Greedy (2.0)C             k:    8: cost:     123   d: Exact
+---- GInc 1.6                  k:    1: cost:    1312   d: Exact
+---- GInc 1.6C                 k:    4: cost:     104   d: Exact
+---- GInc 2.0                  k:    1: cost:    1472   d: Exact
+---- GInc 2.0C                 k:    8: cost:     125   d: Exact
+---- GInc P 1.6                k:    1: cost:     324   d: Exact
+---- GInc P 1.6C               k:    8: cost:     106   d: Exact
+---- GInc P 2.0                k:    1: cost:     369   d: Exact
+---- GInc P 2.0C               k:    8: cost:     122   d: Exact
+---- DiskAnn(1.4,40,10         k:    4: cost:      98   d: Exact
+DST: 0.0
+j: 640
+Query 65 (0.0):
+---- Greedy (1.2)              k:    1: cost:    1150   d: Exact
+---- Greedy (2.0)              k:    1: cost:     620   d: Exact
+---- Greedy (2.0)C             k:    8: cost:     158   d: Exact
+---- GInc 1.6                  k:    1: cost:     763   d: Exact
+---- GInc 1.6C                 k:    4: cost:      85   d: Exact
+---- GInc 2.0                  k:    1: cost:     875   d: Exact
+---- GInc 2.0C                 k:    2: cost:     109   d: Exact
+---- GInc P 1.6                k:    1: cost:     280   d: Exact
+---- GInc P 1.6C               k:    2: cost:      80   d: Exact
+---- GInc P 2.0                k:  320: cost:    4273   d: Exact
+---- GInc P 2.0C               k:    4: cost:     164   d: Exact
+---- DiskAnn(1.4,40,10         k:    4: cost:     139   d: Exact
+DST: 0.0
+j: 642
+Query 66 (0.0):
+---- Greedy (1.2)              k:    1: cost:     335   d: Exact
+---- Greedy (2.0)              k:    1: cost:    1065   d: Exact
+---- Greedy (2.0)C             k:    2: cost:      84   d: Exact
+---- GInc 1.6                  k:    1: cost:     845   d: Exact
+---- GInc 1.6C                 k:   20: cost:     263   d: Exact
+---- GInc 2.0                  k:    1: cost:     956   d: Exact
+---- GInc 2.0C                 k:   20: cost:     256   d: Exact
+---- GInc P 1.6                k:   20: cost:     256   d: Exact
+---- GInc P 1.6C               k:   20: cost:     330   d: Exact
+---- GInc P 2.0                k:   16: cost:    1197   d: Exact
+---- GInc P 2.0C               k:  160: cost:    1078   d: Exact
+---- DiskAnn(1.4,40,10         k:    4: cost:     129   d: Exact
+DST: 0.0
+j: 649
+Query 67 (0.0):
+---- Greedy (1.2)              k: 1000: cost:    5950   d: Exact
+---- Greedy (2.0)              k:    1: cost:     591   d: Exact
+---- Greedy (2.0)C             k:   16: cost:     174   d: Exact
+---- GInc 1.6                  k:    1: cost:     650   d: Exact
+---- GInc 1.6C                 k:    2: cost:      75   d: Exact
+---- GInc 2.0                  k:    1: cost:     732   d: Exact
+---- GInc 2.0C                 k:    4: cost:      91   d: Exact
+---- GInc P 1.6                k:    4: cost:      91   d: Exact
+---- GInc P 1.6C               k:    8: cost:     140   d: Exact
+---- GInc P 2.0                k:    8: cost:     140   d: Exact
+---- GInc P 2.0C               k:    4: cost:     104   d: Exact
+---- DiskAnn(1.4,40,10         k:    8: cost:     172   d: Exact
+DST: 0.0
+j: 671
+Query 68 (0.0):
+---- Greedy (1.2)              k:    1: cost:     275   d: Exact
+---- Greedy (2.0)              k:    1: cost:    1030   d: Exact
+---- Greedy (2.0)C             k:    8: cost:     180   d: Exact
+---- GInc 1.6                  k:    4: cost:     717   d: Exact
+---- GInc 1.6C                 k:    8: cost:     159   d: Exact
+---- GInc 2.0                  k:    1: cost:     935   d: Exact
+---- GInc 2.0C                 k:    8: cost:     150   d: Exact
+---- GInc P 1.6                k: 1000: cost:    5974   d: Exact
+---- GInc P 1.6C               k:    4: cost:     104   d: Exact
+---- GInc P 2.0                k:    4: cost:     104   d: Exact
+---- GInc P 2.0C               k:  320: cost:    1948   d: Exact
+---- DiskAnn(1.4,40,10         k:    1: cost:      78   d: Exact
+DST: 0.0
+j: 683
+Query 69 (0.0):
+---- Greedy (1.2)              k:    1: cost:     327   d: Exact
+---- Greedy (2.0)              k:    1: cost:    1087   d: Exact
+---- Greedy (2.0)C             k:    1: cost:      59   d: Exact
+---- GInc 1.6                  k:    1: cost:    1170   d: Exact
+---- GInc 1.6C                 k:    1: cost:      61   d: Exact
+---- GInc 2.0                  k:    1: cost:    1415   d: Exact
+---- GInc 2.0C                 k:    1: cost:      60   d: Exact
+---- GInc P 1.6                k:    1: cost:     469   d: Exact
+---- GInc P 1.6C               k:    1: cost:      69   d: Exact
+---- GInc P 2.0                k:    1: cost:     426   d: Exact
+---- GInc P 2.0C               k:    1: cost:      85   d: Exact
+---- DiskAnn(1.4,40,10         k:    1: cost:      88   d: Exact
+DST: 0.0
+j: 689
+Query 70 (0.0):
+---- Greedy (1.2)              k:    1: cost:     645   d: Exact
+---- Greedy (2.0)              k:    1: cost:    1421   d: Exact
+---- Greedy (2.0)C             k: 1000: cost:    2956   d: Exact
+---- GInc 1.6                  k:    4: cost:    2543   d: Exact
+---- GInc 1.6C                 k:   40: cost:     297   d: Exact
+---- GInc 2.0                  k:    1: cost:    1730   d: Exact
+---- GInc 2.0C                 k: 1000: cost:    3009   d: Exact
+---- GInc P 1.6                k:  160: cost:    4107   d: Exact
+---- GInc P 1.6C               k:   20: cost:     272   d: Exact
+---- GInc P 2.0                k:   20: cost:     272   d: Exact
+---- GInc P 2.0C               k:   16: cost:     193   d: Exact
+---- DiskAnn(1.4,40,10         k:    2: cost:      88   d: Exact
+DST: 0.0
+j: 695
+Query 71 (0.0):
+---- Greedy (1.2)              k:    1: cost:     243   d: Exact
+---- Greedy (2.0)              k:    1: cost:     823   d: Exact
+---- Greedy (2.0)C             k:    1: cost:      97   d: Exact
+---- GInc 1.6                  k:    1: cost:     690   d: Exact
+---- GInc 1.6C                 k:    1: cost:      94   d: Exact
+---- GInc 2.0                  k:    1: cost:     696   d: Exact
+---- GInc 2.0C                 k:    1: cost:     104   d: Exact
+---- GInc P 1.6                k:    1: cost:     104   d: Exact
+---- GInc P 1.6C               k:    1: cost:      91   d: Exact
+---- GInc P 2.0                k:    1: cost:     497   d: Exact
+---- GInc P 2.0C               k:    1: cost:      89   d: Exact
+---- DiskAnn(1.4,40,10         k:    4: cost:     163   d: Exact
+DST: 0.0
+j: 696
+Query 72 (0.0):
+---- Greedy (1.2)              k:    1: cost:    1163   d: Exact
+---- Greedy (2.0)              k:    1: cost:     890   d: Exact
+---- Greedy (2.0)C             k:    8: cost:     152   d: Exact
+---- GInc 1.6                  k:    1: cost:     629   d: Exact
+---- GInc 1.6C                 k:   16: cost:     210   d: Exact
+---- GInc 2.0                  k:    1: cost:     823   d: Exact
+---- GInc 2.0C                 k:    4: cost:     139   d: Exact
+---- GInc P 1.6                k:    1: cost:     514   d: Exact
+---- GInc P 1.6C               k:    4: cost:     133   d: Exact
+---- GInc P 2.0                k:    1: cost:     458   d: Exact
+---- GInc P 2.0C               k:    8: cost:     216   d: Exact
+---- DiskAnn(1.4,40,10         k:    8: cost:     183   d: Exact
+DST: 0.0
+j: 706
+Query 73 (0.0):
+---- Greedy (1.2)              k:    1: cost:     346   d: Exact
+---- Greedy (2.0)              k:    1: cost:     993   d: Exact
+---- Greedy (2.0)C             k:    4: cost:     100   d: Exact
+---- GInc 1.6                  k:    1: cost:    2248   d: Exact
+---- GInc 1.6C                 k:   80: cost:     679   d: Exact
+---- GInc 2.0                  k:    1: cost:    2394   d: Exact
+---- GInc 2.0C                 k:    8: cost:     147   d: Exact
+---- GInc P 1.6                k:    8: cost:     147   d: Exact
+---- GInc P 1.6C               k:   80: cost:     734   d: Exact
+---- GInc P 2.0                k:   80: cost:     734   d: Exact
+---- GInc P 2.0C               k:   80: cost:     725   d: Exact
+---- DiskAnn(1.4,40,10         k:    4: cost:     121   d: Exact
+DST: 0.0
+j: 731
+Query 74 (0.0):
+---- Greedy (1.2)              k:    1: cost:    1131   d: Exact
+---- Greedy (2.0)              k:    1: cost:    1462   d: Exact
+---- Greedy (2.0)C             k:   40: cost:     282   d: Exact
+---- GInc 1.6                  k:    1: cost:     711   d: Exact
+---- GInc 1.6C                 k:    4: cost:      88   d: Exact
+---- GInc 2.0                  k:    1: cost:     806   d: Exact
+---- GInc 2.0C                 k:   40: cost:     281   d: Exact
+---- GInc P 1.6                k:  320: cost:    4351   d: Exact
+---- GInc P 1.6C               k:    2: cost:      66   d: Exact
+---- GInc P 2.0                k:  320: cost:    4648   d: Exact
+---- GInc P 2.0C               k:   40: cost:     319   d: Exact
+---- DiskAnn(1.4,40,10         k:    2: cost:      71   d: Exact
+DST: 0.0
+j: 738
+Query 75 (0.0):
+---- Greedy (1.2)              k:    1: cost:    1194   d: Exact
+---- Greedy (2.0)              k:    1: cost:    2938   d: Exact
+---- Greedy (2.0)C             k:   20: cost:     206   d: Exact
+---- GInc 1.6                  k:    1: cost:    2466   d: Exact
+---- GInc 1.6C                 k:   16: cost:     188   d: Exact
+---- GInc 2.0                  k:    1: cost:    2696   d: Exact
+---- GInc 2.0C                 k:   40: cost:     291   d: Exact
+---- GInc P 1.6                k:    1: cost:     765   d: Exact
+---- GInc P 1.6C               k:    8: cost:     144   d: Exact
+---- GInc P 2.0                k:    4: cost:     900   d: Exact
+---- GInc P 2.0C               k:   80: cost:     511   d: Exact
+---- DiskAnn(1.4,40,10         k:    8: cost:     127   d: Exact
+DST: 0.0
+j: 751
+Query 76 (0.0):
+---- Greedy (1.2)              k:    1: cost:    1164   d: Exact
+---- Greedy (2.0)              k:    1: cost:    2587   d: Exact
+---- Greedy (2.0)C             k:   80: cost:     495   d: Exact
+---- GInc 1.6                  k:    1: cost:     976   d: Exact
+---- GInc 1.6C                 k:   16: cost:     206   d: Exact
+---- GInc 2.0                  k:    1: cost:    1126   d: Exact
+---- GInc 2.0C                 k:   16: cost:     176   d: Exact
+---- GInc P 1.6                k:  320: cost:    6051   d: Exact
+---- GInc P 1.6C               k:    8: cost:     138   d: Exact
+---- GInc P 2.0                k: 1000: cost:    8340   d: Exact
+---- GInc P 2.0C               k:    4: cost:     122   d: Exact
+---- DiskAnn(1.4,40,10         k:    4: cost:     115   d: Exact
+DST: 0.0
+j: 765
+Query 77 (0.0):
+---- Greedy (1.2)              k:    1: cost:    1312   d: Exact
+---- Greedy (2.0)              k:    1: cost:     962   d: Exact
+---- Greedy (2.0)C             k:   20: cost:     354   d: Exact
+---- GInc 1.6                  k:    1: cost:     647   d: Exact
+---- GInc 1.6C                 k:    8: cost:     145   d: Exact
+---- GInc 2.0                  k:    1: cost:     764   d: Exact
+---- GInc 2.0C                 k:   40: cost:     446   d: Exact
+---- GInc P 1.6                k:   40: cost:     446   d: Exact
+---- GInc P 1.6C               k:  160: cost:    1268   d: Exact
+---- GInc P 2.0                k:  160: cost:    1268   d: Exact
+---- GInc P 2.0C               k:  160: cost:    1318   d: Exact
+---- DiskAnn(1.4,40,10         k:    1: cost:      93   d: Exact
+DST: 0.0
+j: 768
+Query 78 (0.0):
+---- Greedy (1.2)              k:    2: cost:    1428   d: Exact
+---- Greedy (2.0)              k:    1: cost:    1000   d: Exact
+---- Greedy (2.0)C             k:    8: cost:     158   d: Exact
+---- GInc 1.6                  k:    1: cost:     834   d: Exact
+---- GInc 1.6C                 k:    2: cost:     113   d: Exact
+---- GInc 2.0                  k:    1: cost:     927   d: Exact
+---- GInc 2.0C                 k:    8: cost:     234   d: Exact
+---- GInc P 1.6                k:    8: cost:     461   d: Exact
+---- GInc P 1.6C               k:    8: cost:     170   d: Exact
+---- GInc P 2.0                k:    1: cost:     342   d: Exact
+---- GInc P 2.0C               k:    8: cost:     175   d: Exact
+---- DiskAnn(1.4,40,10         k:    1: cost:      72   d: Exact
+DST: 0.0
+j: 776
+Query 79 (0.0):
+---- Greedy (1.2)              k:    1: cost:     446   d: Exact
+---- Greedy (2.0)              k:    1: cost:    1157   d: Exact
+---- Greedy (2.0)C             k:    1: cost:    1157   d: Exact
+---- GInc 1.6                  k:    1: cost:    2042   d: Exact
+---- GInc 1.6C                 k:    1: cost:    2042   d: Exact
+---- GInc 2.0                  k:    1: cost:    2581   d: Exact
+---- GInc 2.0C                 k:    1: cost:    2581   d: Exact
+---- GInc P 1.6                k:    1: cost:     594   d: Exact
+---- GInc P 1.6C               k:    1: cost:     594   d: Exact
+---- GInc P 2.0                k:    1: cost:     594   d: Exact
+---- GInc P 2.0C               k:    1: cost:     594   d: Exact
+---- DiskAnn(1.4,40,10         k:    8: cost:     151   d: Exact
+DST: 0.0
+j: 788
+Query 80 (0.0):
+---- Greedy (1.2)              k:    4: cost:     455   d: Exact
+---- Greedy (2.0)              k:    1: cost:    1152   d: Exact
+---- Greedy (2.0)C             k:   16: cost:     323   d: Exact
+---- GInc 1.6                  k:    1: cost:     824   d: Exact
+---- GInc 1.6C                 k:   20: cost:     390   d: Exact
+---- GInc 2.0                  k:    1: cost:     961   d: Exact
+---- GInc 2.0C                 k:   40: cost:     510   d: Exact
+---- GInc P 1.6                k:   40: cost:     510   d: Exact
+---- GInc P 1.6C               k:   16: cost:     359   d: Exact
+---- GInc P 2.0                k:   16: cost:     359   d: Exact
+---- GInc P 2.0C               k:   20: cost:     436   d: Exact
+---- DiskAnn(1.4,40,10         k:    4: cost:     203   d: Exact
+DST: 0.0
+j: 796
+Query 81 (0.0):
+---- Greedy (1.2)              k:    1: cost:     264   d: Exact
+---- Greedy (2.0)              k:    1: cost:     939   d: Exact
+---- Greedy (2.0)C             k:  160: cost:    1395   d: Exact
+---- GInc 1.6                  k:    1: cost:     611   d: Exact
+---- GInc 1.6C                 k:   80: cost:     871   d: Exact
+---- GInc 2.0                  k:    1: cost:     730   d: Exact
+---- GInc 2.0C                 k:   20: cost:     272   d: Exact
+---- GInc P 1.6                k:   20: cost:     272   d: Exact
+---- GInc P 1.6C               k:   80: cost:     839   d: Exact
+---- GInc P 2.0                k:   80: cost:     839   d: Exact
+---- GInc P 2.0C               k:  160: cost:    1484   d: Exact
+---- DiskAnn(1.4,40,10         k:    4: cost:     105   d: Exact
+DST: 0.0
+j: 803
+Query 82 (0.0):
+---- Greedy (1.2)              k:    1: cost:    1224   d: Exact
+---- Greedy (2.0)              k:    1: cost:    1889   d: Exact
+---- Greedy (2.0)C             k:   40: cost:     401   d: Exact
+---- GInc 1.6                  k:   16: cost:    3259   d: Exact
+---- GInc 1.6C                 k:   16: cost:     278   d: Exact
+---- GInc 2.0                  k:   16: cost:    3560   d: Exact
+---- GInc 2.0C                 k:   40: cost:     460   d: Exact
+---- GInc P 1.6                k:   40: cost:     460   d: Exact
+---- GInc P 1.6C               k:   16: cost:     268   d: Exact
+---- GInc P 2.0                k:   16: cost:     268   d: Exact
+---- GInc P 2.0C               k:   40: cost:     488   d: Exact
+---- DiskAnn(1.4,40,10         k:    4: cost:     131   d: Exact
+DST: 0.0
+j: 821
+Query 83 (0.0):
+---- Greedy (1.2)              k:    4: cost:    1425   d: Exact
+---- Greedy (2.0)              k:    1: cost:    2596   d: Exact
+---- Greedy (2.0)C             k:    8: cost:     141   d: Exact
+---- GInc 1.6                  k:    1: cost:    2349   d: Exact
+---- GInc 1.6C                 k:    8: cost:     150   d: Exact
+---- GInc 2.0                  k:    1: cost:    2522   d: Exact
+---- GInc 2.0C                 k:    8: cost:     151   d: Exact
+---- GInc P 1.6                k:    1: cost:     267   d: Exact
+---- GInc P 1.6C               k:    8: cost:     170   d: Exact
+---- GInc P 2.0                k:    1: cost:     344   d: Exact
+---- GInc P 2.0C               k:    8: cost:     139   d: Exact
+---- DiskAnn(1.4,40,10         k:    2: cost:      63   d: Exact
+DST: 0.0
+j: 825
+Query 84 (0.0):
+---- Greedy (1.2)              k:    1: cost:     465   d: Exact
+---- Greedy (2.0)              k:    1: cost:    1190   d: Exact
+---- Greedy (2.0)C             k:    2: cost:      74   d: Exact
+---- GInc 1.6                  k:    1: cost:    1434   d: Exact
+---- GInc 1.6C                 k:    1: cost:      72   d: Exact
+---- GInc 2.0                  k:    1: cost:    1456   d: Exact
+---- GInc 2.0C                 k:    1: cost:      70   d: Exact
+---- GInc P 1.6                k:    1: cost:     356   d: Exact
+---- GInc P 1.6C               k:    1: cost:      64   d: Exact
+---- GInc P 2.0                k:  320: cost:    1900   d: Exact
+---- GInc P 2.0C               k:    2: cost:      78   d: Exact
+---- DiskAnn(1.4,40,10         k:    4: cost:     124   d: Exact
+DST: 0.0
+j: 828
+Query 85 (0.0):
+---- Greedy (1.2)              k:    1: cost:    1294   d: Exact
+---- Greedy (2.0)              k:    1: cost:    2993   d: Exact
+---- Greedy (2.0)C             k:   16: cost:     248   d: Exact
+---- GInc 1.6                  k:    1: cost:    2643   d: Exact
+---- GInc 1.6C                 k:   16: cost:     255   d: Exact
+---- GInc 2.0                  k:    1: cost:    2814   d: Exact
+---- GInc 2.0C                 k:   20: cost:     232   d: Exact
+---- GInc P 1.6                k:    1: cost:     398   d: Exact
+---- GInc P 1.6C               k:   16: cost:     232   d: Exact
+---- GInc P 2.0                k:    1: cost:     477   d: Exact
+---- GInc P 2.0C               k:    8: cost:     136   d: Exact
+---- DiskAnn(1.4,40,10         k:   16: cost:     253   d: Exact
+DST: 0.0
+j: 833
+Query 86 (0.0):
+---- Greedy (1.2)              k:    1: cost:    1050   d: Exact
+---- Greedy (2.0)              k:    1: cost:    2342   d: Exact
+---- Greedy (2.0)C             k:    4: cost:      91   d: Exact
+---- GInc 1.6                  k:    1: cost:     303   d: Exact
+---- GInc 1.6C                 k:    1: cost:     303   d: Exact
+---- GInc 2.0                  k:    1: cost:     393   d: Exact
+---- GInc 2.0C                 k:    1: cost:     393   d: Exact
+---- GInc P 1.6                k:    1: cost:     393   d: Exact
+---- GInc P 1.6C               k:    4: cost:      79   d: Exact
+---- GInc P 2.0                k: 1000: cost:    8409   d: Exact
+---- GInc P 2.0C               k:    4: cost:     110   d: Exact
+---- DiskAnn(1.4,40,10         k:    1: cost:      67   d: Exact
+DST: 0.0
+j: 839
+Query 87 (0.0):
+---- Greedy (1.2)              k:    1: cost:     202   d: Exact
+---- Greedy (2.0)              k:    1: cost:     806   d: Exact
+---- Greedy (2.0)C             k:  160: cost:    1289   d: Exact
+---- GInc 1.6                  k:    1: cost:     687   d: Exact
+---- GInc 1.6C                 k:   40: cost:     519   d: Exact
+---- GInc 2.0                  k:    1: cost:     662   d: Exact
+---- GInc 2.0C                 k:   40: cost:     429   d: Exact
+---- GInc P 1.6                k:   40: cost:     429   d: Exact
+---- GInc P 1.6C               k:  320: cost:    1987   d: Exact
+---- GInc P 2.0                k:    1: cost:     645   d: Exact
+---- GInc P 2.0C               k: 1000: cost:    4292   d: Exact
+---- DiskAnn(1.4,40,10         k:    4: cost:     157   d: Exact
+DST: 0.0
+j: 847
+Query 88 (0.0):
+---- Greedy (1.2)              k:    1: cost:     159   d: Exact
+---- Greedy (2.0)              k:    1: cost:     649   d: Exact
+---- Greedy (2.0)C             k:  320: cost:    1736   d: Exact
+---- GInc 1.6                  k:    1: cost:     450   d: Exact
+---- GInc 1.6C                 k:   16: cost:     238   d: Exact
+---- GInc 2.0                  k:    1: cost:     544   d: Exact
+---- GInc 2.0C                 k:   40: cost:     424   d: Exact
+---- GInc P 1.6                k:    1: cost:     325   d: Exact
+---- GInc P 1.6C               k:  320: cost:    2056   d: Exact
+---- GInc P 2.0                k:    4: cost:     503   d: Exact
+---- GInc P 2.0C               k: 1000: cost:    3902   d: Exact
+---- DiskAnn(1.4,40,10         k:   16: cost:     302   d: Exact
+DST: 0.0
+j: 860
+Query 89 (0.0):
+---- Greedy (1.2)              k:    1: cost:     191   d: Exact
+---- Greedy (2.0)              k:    1: cost:     687   d: Exact
+---- Greedy (2.0)C             k:   16: cost:     302   d: Exact
+---- GInc 1.6                  k:    1: cost:     635   d: Exact
+---- GInc 1.6C                 k:   16: cost:     312   d: Exact
+---- GInc 2.0                  k:    1: cost:     863   d: Exact
+---- GInc 2.0C                 k:    2: cost:      91   d: Exact
+---- GInc P 1.6                k:    2: cost:     397   d: Exact
+---- GInc P 1.6C               k:  320: cost:    2005   d: Exact
+---- GInc P 2.0                k:    1: cost:     765   d: Exact
+---- GInc P 2.0C               k:  160: cost:    1396   d: Exact
+---- DiskAnn(1.4,40,10         k:   16: cost:     300   d: Exact
+DST: 0.0
+j: 861
+Query 90 (0.0):
+---- Greedy (1.2)              k:    8: cost:     470   d: Exact
+---- Greedy (2.0)              k:    1: cost:    1220   d: Exact
+---- Greedy (2.0)C             k:   40: cost:     443   d: Exact
+---- GInc 1.6                  k:    1: cost:     949   d: Exact
+---- GInc 1.6C                 k:   16: cost:     330   d: Exact
+---- GInc 2.0                  k:    1: cost:    1134   d: Exact
+---- GInc 2.0C                 k:    8: cost:     261   d: Exact
+---- GInc P 1.6                k:   16: cost:     582   d: Exact
+---- GInc P 1.6C               k:    8: cost:     266   d: Exact
+---- GInc P 2.0                k:    1: cost:    1044   d: Exact
+---- GInc P 2.0C               k:    8: cost:     364   d: Exact
+---- DiskAnn(1.4,40,10         k:    2: cost:     115   d: Exact
+DST: 0.0
+j: 871
+Query 91 (0.0):
+---- Greedy (1.2)              k:    1: cost:    1064   d: Exact
+---- Greedy (2.0)              k:    1: cost:    2408   d: Exact
+---- Greedy (2.0)C             k:    4: cost:      67   d: Exact
+---- GInc 1.6                  k:    1: cost:    2386   d: Exact
+---- GInc 1.6C                 k:    1: cost:      60   d: Exact
+---- GInc 2.0                  k:    1: cost:    2526   d: Exact
+---- GInc 2.0C                 k:    1: cost:      51   d: Exact
+---- GInc P 1.6                k:    1: cost:     315   d: Exact
+---- GInc P 1.6C               k:    1: cost:      58   d: Exact
+---- GInc P 2.0                k:    1: cost:     502   d: Exact
+---- GInc P 2.0C               k:    1: cost:      57   d: Exact
+---- DiskAnn(1.4,40,10         k:    4: cost:     105   d: Exact
+DST: 0.0
+j: 875
+Query 92 (0.0):
+---- Greedy (1.2)              k:   80: cost:    1746   d: Exact
+---- Greedy (2.0)              k:    1: cost:     622   d: Exact
+---- Greedy (2.0)C             k:    1: cost:      50   d: Exact
+---- GInc 1.6                  k:    1: cost:     773   d: Exact
+---- GInc 1.6C                 k:    1: cost:      50   d: Exact
+---- GInc 2.0                  k:    1: cost:     865   d: Exact
+---- GInc 2.0C                 k:    1: cost:      50   d: Exact
+---- GInc P 1.6                k:    1: cost:      50   d: Exact
+---- GInc P 1.6C               k:    1: cost:      49   d: Exact
+---- GInc P 2.0                k:    1: cost:      49   d: Exact
+---- GInc P 2.0C               k:    1: cost:      50   d: Exact
+---- DiskAnn(1.4,40,10         k:    1: cost:      49   d: Exact
+DST: 0.0
+j: 887
+Query 93 (0.0):
+---- Greedy (1.2)              k:    1: cost:    1115   d: Exact
+---- Greedy (2.0)              k:    1: cost:    2478   d: Exact
+---- Greedy (2.0)C             k: 1000: cost:    3611   d: Exact
+---- GInc 1.6                  k:    1: cost:     724   d: Exact
+---- GInc 1.6C                 k:    8: cost:     151   d: Exact
+---- GInc 2.0                  k:    1: cost:     803   d: Exact
+---- GInc 2.0C                 k:    4: cost:     109   d: Exact
+---- GInc P 1.6                k:    4: cost:     109   d: Exact
+---- GInc P 1.6C               k:    8: cost:     165   d: Exact
+---- GInc P 2.0                k:    8: cost:     165   d: Exact
+---- GInc P 2.0C               k:    8: cost:     165   d: Exact
+---- DiskAnn(1.4,40,10         k:    2: cost:      90   d: Exact
+DST: 0.0
+j: 889
+Query 94 (0.0):
+---- Greedy (1.2)              k:    1: cost:    1194   d: Exact
+---- Greedy (2.0)              k:    1: cost:    1753   d: Exact
+---- Greedy (2.0)C             k:   40: cost:     251   d: Exact
+---- GInc 1.6                  k:    1: cost:    1871   d: Exact
+---- GInc 1.6C                 k:   40: cost:     277   d: Exact
+---- GInc 2.0                  k:    1: cost:    2039   d: Exact
+---- GInc 2.0C                 k:   40: cost:     253   d: Exact
+---- GInc P 1.6                k:  160: cost:    1621   d: Exact
+---- GInc P 1.6C               k:   40: cost:     277   d: Exact
+---- GInc P 2.0                k:    1: cost:     350   d: Exact
+---- GInc P 2.0C               k:   80: cost:     406   d: Exact
+---- DiskAnn(1.4,40,10         k:    4: cost:      96   d: Exact
+DST: 0.0
+j: 910
+Query 95 (0.0):
+---- Greedy (1.2)              k:    1: cost:     175   d: Exact
+---- Greedy (2.0)              k:    1: cost:     563   d: Exact
+---- Greedy (2.0)C             k:    1: cost:     563   d: Exact
+---- GInc 1.6                  k:    1: cost:     483   d: Exact
+---- GInc 1.6C                 k:   80: cost:     331   d: Exact
+---- GInc 2.0                  k:    1: cost:     568   d: Exact
+---- GInc 2.0C                 k:   16: cost:     188   d: Exact
+---- GInc P 1.6                k:   16: cost:     188   d: Exact
+---- GInc P 1.6C               k:   16: cost:     188   d: Exact
+---- GInc P 2.0                k:   16: cost:     188   d: Exact
+---- GInc P 2.0C               k:    8: cost:     109   d: Exact
+---- DiskAnn(1.4,40,10         k:    8: cost:     160   d: Exact
+DST: 0.0
+j: 911
+Query 96 (0.0):
+---- Greedy (1.2)              k:    1: cost:     309   d: Exact
+---- Greedy (2.0)              k:    1: cost:     881   d: Exact
+---- Greedy (2.0)C             k:    8: cost:     287   d: Exact
+---- GInc 1.6                  k:    1: cost:     914   d: Exact
+---- GInc 1.6C                 k:   80: cost:     920   d: Exact
+---- GInc 2.0                  k:    1: cost:    1017   d: Exact
+---- GInc 2.0C                 k:   40: cost:     643   d: Exact
+---- GInc P 1.6                k:   40: cost:     643   d: Exact
+---- GInc P 1.6C               k:    8: cost:     326   d: Exact
+---- GInc P 2.0                k:    8: cost:     326   d: Exact
+---- GInc P 2.0C               k:    4: cost:     195   d: Exact
+---- DiskAnn(1.4,40,10         k:    8: cost:     157   d: Exact
+DST: 0.0
+j: 914
+Query 97 (0.0):
+---- Greedy (1.2)              k:  320: cost:    4857   d: Exact
+---- Greedy (2.0)              k:    1: cost:     979   d: Exact
+---- Greedy (2.0)C             k:   40: cost:     495   d: Exact
+---- GInc 1.6                  k:    1: cost:     834   d: Exact
+---- GInc 1.6C                 k:    8: cost:     249   d: Exact
+---- GInc 2.0                  k:    1: cost:    1288   d: Exact
+---- GInc 2.0C                 k:   40: cost:     440   d: Exact
+---- GInc P 1.6                k: 1000: cost:    6962   d: Exact
+---- GInc P 1.6C               k:    8: cost:     164   d: Exact
+---- GInc P 2.0                k:    8: cost:     164   d: Exact
+---- GInc P 2.0C               k:   16: cost:     298   d: Exact
+---- DiskAnn(1.4,40,10         k:    2: cost:      97   d: Exact
+DST: 0.0
+j: 924
+Query 98 (0.0):
+---- Greedy (1.2)              k:   40: cost:    1688   d: Exact
+---- Greedy (2.0)              k:    1: cost:    1402   d: Exact
+---- Greedy (2.0)C             k:    4: cost:      71   d: Exact
+---- GInc 1.6                  k:    1: cost:    2269   d: Exact
+---- GInc 1.6C                 k:    1: cost:      51   d: Exact
+---- GInc 2.0                  k:    1: cost:    1499   d: Exact
+---- GInc 2.0C                 k:    1: cost:      50   d: Exact
+---- GInc P 1.6                k: 1000: cost:    6455   d: Exact
+---- GInc P 1.6C               k:    1: cost:      51   d: Exact
+---- GInc P 2.0                k: 1000: cost:    7057   d: Exact
+---- GInc P 2.0C               k:    1: cost:      48   d: Exact
+---- DiskAnn(1.4,40,10         k:    1: cost:      44   d: Exact
+DST: 0.0
+j: 932
+Query 99 (0.0):
+---- Greedy (1.2)              k:    2: cost:    1409   d: Exact
+---- Greedy (2.0)              k:    1: cost:    1226   d: Exact
+---- Greedy (2.0)C             k:    1: cost:      58   d: Exact
+---- GInc 1.6                  k:    2: cost:     653   d: Exact
+---- GInc 1.6C                 k:    1: cost:      97   d: Exact
+---- GInc 2.0                  k:    1: cost:     690   d: Exact
+---- GInc 2.0C                 k:    1: cost:      81   d: Exact
+---- GInc P 1.6                k:    1: cost:     656   d: Exact
+---- GInc P 1.6C               k:    1: cost:      69   d: Exact
+---- GInc P 2.0                k:    1: cost:     606   d: Exact
+---- GInc P 2.0C               k:    1: cost:      61   d: Exact
+---- DiskAnn(1.4,40,10         k:    1: cost:      83   d: Exact
+DST: 0.0
+j: 933
+Query 100 (0.0):
+---- Greedy (1.2)              k:    1: cost:     348   d: Exact
+---- Greedy (2.0)              k:    1: cost:     878   d: Exact
+---- Greedy (2.0)C             k:    1: cost:      43   d: Exact
+---- GInc 1.6                  k:    1: cost:    1128   d: Exact
+---- GInc 1.6C                 k:    1: cost:      43   d: Exact
+---- GInc 2.0                  k:    1: cost:    1233   d: Exact
+---- GInc 2.0C                 k:    1: cost:      44   d: Exact
+---- GInc P 1.6                k:    1: cost:      44   d: Exact
+---- GInc P 1.6C               k:    1: cost:      43   d: Exact
+---- GInc P 2.0                k:    1: cost:      43   d: Exact
+---- GInc P 2.0C               k:    1: cost:      43   d: Exact
+---- DiskAnn(1.4,40,10         k:    1: cost:      38   d: Exact
+
+n: 25000
+----------------------------------------------------
+Greedy (1.2)       #e: 1016616 avg_d: 40.66  avg_sol_k:  20.43  avg_c: 1085.94
+Greedy (2.0)       #e: 4736273 avg_d: 189.45  avg_sol_k:   5.80  avg_c: 1751.55
+Greedy (2.0)C      #e: 245587 avg_d:  9.82  avg_sol_k:  63.11  avg_c: 401.28
+GInc 1.6           #e: 3687391 avg_d: 147.50  avg_sol_k:  19.96  avg_c: 1658.14
+GInc 1.6C          #e: 243350 avg_d:  9.73  avg_sol_k:  38.60  avg_c: 350.73
+GInc 2.0           #e: 4287964 avg_d: 171.52  avg_sol_k:   5.54  avg_c: 1637.33
+GInc 2.0C          #e: 244772 avg_d:  9.79  avg_sol_k:  41.86  avg_c: 353.98
+GInc P 1.6         #e: 3518867 avg_d: 140.75  avg_sol_k:  97.15  avg_c: 1136.69
+GInc P 1.6C        #e: 243215 avg_d:  9.73  avg_sol_k:  38.97  avg_c: 399.5
+GInc P 2.0         #e: 4140986 avg_d: 165.64  avg_sol_k:  80.40  avg_c: 1311.66
+GInc P 2.0C        #e: 246865 avg_d:  9.87  avg_sol_k:  78.37  avg_c: 586.12
+DiskAnn(1.4,40,10  #e: 253190 avg_d: 10.13  avg_sol_k:   5.31  avg_c: 128.6
+----------------------------------------------------
+────────────────────────────────────────────
+Section              ncalls     time    %tot
+────────────────────────────────────────────
+DiskAnn                   1     425s   14.7%
+GInc 2.0C                 1     312s   10.8%
+GInc 2.0                  1     296s   10.3%
+GInc P 1.6C               1     268s    9.3%
+GInc P 2.0                1     259s    9.0%
+GInc 1.6C                 1     259s    9.0%
+GInc 1.6                  1     249s    8.6%
+GInc P 2.0⇐C              1     235s    8.1%
+GInc P 1.6                1     205s    7.1%
+GGraph 2.0C               1     187s    6.5%
+GGraph 2.0                1    88.6s    3.1%
+Greedy Permutation        1    60.7s    2.1%
+GGraph 1.2                1    42.5s    1.5%
+────────────────────────────────────────────
