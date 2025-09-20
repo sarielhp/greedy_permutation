@@ -765,11 +765,11 @@ function nng_build_and_permut!(
         end
         
         # Pruning is done only after we constructed at least half the graph...
-        if   ( f_prune  &&  ( handled > (n/2) ) )
+        if   f_prune  ||  f_shortcut #( f_prune  &&  ( handled > (n/2) ) )
             for v ∈ N
-                if  outdegree( G.G, v ) > 4*params.Δ
+                if  outdegree( G.G, v ) > 3*params.Δ
                     U = Set{Int}( outneighbors( G.G, v ) )
-                    robust_prune_vertex!( G, v, U, params.α, params.Δ )
+                    robust_prune_vertex!( G, v, U, params.α, 3*params.Δ ÷ 2 )
                 end
             end                    
         end
@@ -1066,11 +1066,11 @@ function  query_testing_inner( Graphs, m_i, m_q )
         ℓ = nn_search_brute_force( m_i, m_q[ :, i] )
         println( "Query ", i, " (", ℓ, "):" )
         
-        rec = zeros( Float64, 2 )
         line = "FAIL"
         for g ∈ 1:length(Graphs)
             G = Graphs[ g ]
             f_first = true
+            rec = zeros( Float64, 2 )
             for  k ∈ lens
                 str, f_exact, perf = nng_nn_search_print( G, QS.m[ :, i ], k, ℓ )
                 if  f_first
@@ -1154,16 +1154,18 @@ function  test_nn_queries( params, m_i, m_q )
     function  greedy_graph( params, bfactor, clean::Int = 0  )
         println( "Building greedy graph ", bfactor )
         str = "GGraph " * string( bfactor )
-        @timeit T str G = nng_greedy_graph( params, m_i, I, D, bfactor )    
-        desc_str = "Greedy (" * string( bfactor ) * ")"
-
-        description!( G, desc_str )
-        push!( Graphs, G )
-
-        cleaning( G, clean, str, desc_str )
-        
-        println( "Done\n" )
-        flush( stdout )            
+        @timeit T str begin
+            @timeit T "building" G = nng_greedy_graph( params, m_i, I, D, bfactor )
+            desc_str = "Greedy (" * string( bfactor ) * ")"
+            
+            description!( G, desc_str )
+            push!( Graphs, G )
+            
+            cleaning( G, clean, str, desc_str )
+            
+            println( "Done\n" )
+            flush( stdout )            
+        end
     end
     
     function  inc_graph( bfactor, clean::Int = 0  )
@@ -1182,14 +1184,16 @@ function  test_nn_queries( params, m_i, m_q )
         println( "Incremental prune graph construction (", bfactor, ")" )
         m_inc = PermutMetric(  MPointsSpace( m_i ) )
         str = "GInc P " * string( bfactor )
-        @timeit T str  G, _ = nng_build_and_permut!( params,
-            m_inc, bfactor, true )
-        description!( G, str )
-        if  f_store_first 
-            push!( Graphs, G )
+        @timeit T str  begin
+            @timeit T "building" G, _ = nng_build_and_permut!( params,
+                m_inc, bfactor, true )
+            description!( G, str )
+            if  f_store_first 
+                push!( Graphs, G )
+            end
+            flush( stdout )
+            cleaning( G, clean, str, str, f_rev )
         end
-        flush( stdout )
-        cleaning( G, clean, str, str, f_rev )
     end
 
     function  inc_graph_shortcut( bfactor, clean::Int = 0,
@@ -1200,29 +1204,31 @@ function  test_nn_queries( params, m_i, m_q )
         if  f_shortcut_inc
             str = str * "[SC]"
         end
-        @timeit T str  G, _ = nng_build_and_permut!( params,
-            m_inc, bfactor, false, f_shortcut_inc )
-        description!( G, str )
-        if  f_store_first 
-            push!( Graphs, G )
+        @timeit T str begin
+            G, _ = nng_build_and_permut!( params,
+                m_inc, bfactor, false, f_shortcut_inc )
+            description!( G, str )
+            if  f_store_first 
+                push!( Graphs, G )
+            end
+            println( "Cleaning..." )
+            flush( stdout )
+            cleaning( G, clean, str, str, false, true )
         end
-        println( "Cleaning..." )
-        flush( stdout )
-        cleaning( G, clean, str, str, false, true )
     end
 
     ####################################################################
     ####################################################################
     #greedy_graph( 1.1 )
-    #greedy_graph( params, 1.2 )
-    greedy_graph( params, 2.0, 1 )
+    greedy_graph( params, 1.6, 1 )
+    #greedy_graph( params, 2.0, 1 )
                 
     #inc_graph( 1.3 )
-    inc_graph( 1.6, 1 )
+    #inc_graph( 1.6, 1 )
     #inc_graph( 2.0, 1 )
     #inc_graph( 3.0, 2 )
         
-    inc_prune_graph( 1.6, 1 )
+    #inc_prune_graph( 1.6, 1 )
     #inc_prune_graph( 2.0, 1, false )
     #inc_prune_graph( 2.0, 1, true, true )
 
@@ -1272,7 +1278,8 @@ end
 function  (@main)(args)
     #m_i, m_q = input_random( 100, 10, 2 )
     #m_i, m_q = input_random( 2000, 50, 20 )
-    m_i, m_q = input_sift_small()# # 10000, 1000, 8 )
+    #m_i, m_q = input_sift_small()# # 25000, 1000, 8 )
+    m_i, m_q = input_sift()# # 100,000, 1000, 8 )
 
     params = NParams()
     params.α = 1.4 
