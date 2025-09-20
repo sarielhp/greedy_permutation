@@ -307,6 +307,7 @@ function find_k_lowest_f(G::DiGraph, u::Int, k::Int, f )
     # The lowest f value has the highest priority.
     pq     = PriorityQueue{Int, Float64}()
     result = PriorityQueue{Int, Float64}(Base.Reverse)
+#    pw 
     u_val = eval_f( u )
 
     enqueue!( pq, u, u_val )
@@ -376,16 +377,51 @@ function vertex_prune!( G, v, α, Δ )
     robust_prune_vertex!( G, π[ i ], U, α, Δ )
 end
         
+"""
+    find_k_lowest_f_greedy(G::DiGraph, u::Int, k::Int, f)
+
+Finds the `k` vertices in the directed graph `G` (of type `DiGraph`) starting from vertex `u` that have the lowest values according to the function `f`.
+
+# Arguments
+- `G::DiGraph`: The directed graph to search.
+- `u::Int`: The starting vertex.
+- `k::Int`: The number of vertices with the lowest `f` values to find.
+- `f`: A function that takes a vertex index and returns a `Float64` value.
+
+Returns
+-------
+ A tuple `(rs, cost, visited, visited_out, path)` where:
+   - `rs`: A vector of the `k` vertices with the lowest `f` values, in order
+           from lowest to highest.
+           Each element is a tuple `(vertex_id, (hop_distance, f_val))`.
+   - `cost`: The number of times the function `f` was called (i.e., the number of value computations).
+   - `visited`: A set of vertices that were visited during the search.
+   - `visited_out`: A vector of tuples `(vertex_id, hop_distance, f_val)` representing the order in which vertices were visited.
+   - `path`: A vector of tuples `(vertex_id, f_val)` representing the path from the starting vertex to the 
+      closet vetex found.
+
+# Notes
+- The function uses a priority queue to efficiently find the `k` lowest `f` values.
+- Memoization is used to avoid redundant calls to `f`.
+- The function also tracks the path and hop distance, but only the vertices, cost, and visited set are returned.
+- The function assumes that vertex indices are integers and that `f` is defined for all relevant vertices.
+
+"""
 
 function find_k_lowest_f_greedy(G::DiGraph, u::Int, k::Int, f )
     @assert( k > 0 )
     
+    #pq     = PriorityQueue{Int, Float64}()
+    #result = PriorityQueue{Int, Float64}(Base.Reverse)
+
     # Use a PriorityQueue to store vertices to visit, prioritized by their f value.
     # The lowest f value has the highest priority.
-    pq     = PriorityQueue{Int, Float64}()
-    result = PriorityQueue{Int, Float64}(Base.Reverse)
-    leftover = Vector{Tuple{Int,Int}}()
+    pq = PriorityQueue{Int, Tuple{Int, Float64}}(Base.Order.By(p -> p[2]))
+    result = PriorityQueue{Int, Tuple{Int, Float64}}(Base.Order.By(p -> -p[2]))
+    
+    leftover = Vector{Tuple{Int,Int, Int}}()  # (vertex, prev_vertex, hop_dist) 
     visited = Set{Int}()
+    visited_out = Vector{Tuple{Int,Int,Float64}}()
     prev = Dict{Int,Int}()
     vals_f = Dict{Int,Float64}()
     cost::Int = 0  # The number of times f was called...
@@ -405,20 +441,20 @@ function find_k_lowest_f_greedy(G::DiGraph, u::Int, k::Int, f )
     function  leftover_to_queue()
         while  !isempty( leftover )
             #z, z_val = peek( leftover )
-            z, z_prev = pop!( leftover )
+            z, z_prev,hop = pop!( leftover )
             if  ( z ∈ visited )
                 continue
             end
-            push!( visited, z )
-            @assert( z ∈ visited )
             z_val = eval_f( z )
+            push!( visited, z )
+            push!( visited_out, (z, hop, z_val) )
             if  ( f_threshold   &&  ( threshold < z_val ) )
                 continue
             end
 
-            enqueue!( pq, z, z_val )
+            enqueue!( pq, z, (hop, z_val) )
             prev[ z ] = z_prev
-            enqueue!( result, z, z_val )
+            enqueue!( result, z, (hop, z_val) )
         end
     end
 
@@ -427,15 +463,16 @@ function find_k_lowest_f_greedy(G::DiGraph, u::Int, k::Int, f )
     # Threshold for greedy jump. This constant maybe should be optimized?
     δ = 0.7
 
-    enqueue!( pq, u, u_val )
+    enqueue!( pq, u, (1, u_val) )
     prev[ u ] = u
-    enqueue!( result, u, u_val )
+    enqueue!( result, u, (1, u_val) )
     curr = u_val
     
     # A set to keep track of visited vertices to avoid cycles and
     # redundant processing.
     push!(visited, u)
-    
+    push!(visited_out, (u, 1, u_val))
+
     # Loop until the PriorityQueue is empty or we have found k vertices.
     while ( ( !isempty(pq) )  ||  ( !isempty( leftover ) ) )
         if isempty( pq )
@@ -447,53 +484,55 @@ function find_k_lowest_f_greedy(G::DiGraph, u::Int, k::Int, f )
         
         # Dequeue the vertex with the current lowest f value.
         #println( "before dequeue!" )
-        v, v_val = peek( pq )
+        v, (v_hop, v_val) = peek( pq )
         dequeue!(pq)
 
         if  v_val < curr
             curr = v_val
         end
-        
+
+        #-------------------------------------------------------------------------
+        # Trim the result queue so that it does not contains more than k results
+        #-------------------------------------------------------------------------
         ℓ = length( result )
         if  ( ℓ >= k )
             f_threshold = true
             while  ( length( result ) > k )
                 dequeue!( result )
             end
-            _, threshold = peek( result )
-            #println( "threshold: ", threshold )
-            # Maybe too aggressive?
+            _, (_, threshold) = peek( result )
             if  ( v_val > threshold )
                 break
             end
         end
 
         # Put it into the results...
-        result[ v ] = v_val
+        result[ v ] = (v_hop, v_val)
 
+        ### Handle the outgoing edges from v
         N = outneighbors(G, v)
-
         f_copy = false
         for  o ∈ N
             if  ( o ∈ visited )
                 continue
             end
             if  f_copy
-                push!( leftover, (o, v) )
+                push!( leftover, (o, v, v_hop + 1) )
                 continue
             end
+            o_val = eval_f( o )
 
             push!( visited, o )
+            push!( visited_out, (o, v_hop + 1, o_val) )
 
-            o_val = eval_f( o )
             # @assert( o_val > 0.0 )
             if  ( f_threshold   &&  ( threshold < o_val ) )
                 continue
             end
             
-            enqueue!( pq, o, o_val )
+            enqueue!( pq, o, (v_hop + 1, o_val ) )
             prev[ o ] = v
-            enqueue!( result, o, o_val )
+            enqueue!( result, o, (v_hop+1, o_val) )
 
             # Greedily jump if the improvement is significant...
             if  ( o_val < δ * curr )
@@ -506,44 +545,20 @@ function find_k_lowest_f_greedy(G::DiGraph, u::Int, k::Int, f )
     cl = collect( result )
     rs = [cl[i]  for i ∈ length(cl):-1:1]
 
-    # extract the search path
+
     v = rs[ 1 ][1]
-    #println( rs )
-    #println( "BEST: ", v )
-    
     path = Vector{Tuple{Int,Float64}}()
-#    opath = Vector{Tuple{Int,Float64}}()
-#    curr = -1.0
-#    β  = 1.1
     while v > 0
         v_val = vals_f[ v ]
         push!( path, (v, v_val) )
-#        if  (v_val > β * curr)  &&  ( v > 1 )
-#            push!( opath, (v, v_val ) )
-#            curr = v_val
-#        end
         if  v == 1
             v = 0
         else
             v = prev[ v ]        
         end
     end
-    #=
-    ℓ =  length( path )
-    if ℓ > 10
-        #reverse!( opath )
-        #println( "LEN: ", length( path ) )
-        for i ∈ 1:(length(opath) -1 )
-            u = opath[ i ][1]
-            v = opath[ i + 1 ][1]
-            add_edge!(G, u, v )
-            if  ( outdegree( outdegree( G.G, u ) ) > Δ )
-                  vertex_prune!( G, v, α, Δ )
-            end
-        end
-    end
-    =#
-    return   rs, cost, visited, path
+
+    return   rs, cost, visited, visited_out, path
 end
 
 
@@ -554,9 +569,9 @@ function  nn_add_edges!( G, m, i, r_i, factor, Δ )
 
     out = Vector{Int}()
     #println( "TYPEOF: ", typeof( m ) )
-    result, _ = find_k_lowest_f(G, 1, 200, dist_to_i )
+    result, _ = find_k_lowest_f_greedy(G, 1, 100, dist_to_i )
     forced::Int = 3 #Δ/2 #3
-    for (u, dista) ∈ result        
+    for (u, (hop,dista)) ∈ result        
         if (dista < factor * r_i ) ||  ( forced > 0 )
             forced -= 1
             add_edge!(G, u, i)
@@ -621,20 +636,24 @@ end
 
 function  nng_nn_search_all( _G::NNGraph{FMS}, 
                                  q::Int,
-                                 k::Int = 20
+                                 L::Int = 20
                                 ) where {FMS}
-    result, _, visited = find_k_lowest_f( _G.G, 1, k, j -> dist( _G.m, j, q ) )
+    result, _, visited, visited_out,_ = find_k_lowest_f_greedy( _G.G, 1, L, j -> dist( _G.m, j, q ) )
 
-    return  result, visited
+    return  result, visited, visited_out
 end
 
+
+"""
+Returns only the distance to the nearest neighbor.
+"""
 function  nng_nn_search_reg( _G::NNGraph{FMS}, 
                                  q::Int,
                                  k::Int = 20
                                 ) where {FMS}
     result, _ = nng_nn_search_all( _G, q, k )
 
-    return  result[ 1 ]
+    return result[ 1 ][2][2]
 end
 
 function  nng_nn_search( _G::NNGraph{FMS}, 
@@ -682,11 +701,11 @@ function  nng_nn_search_print( _G::NNGraphFMS,
                                ℓ::Float64
                                 ) where {NNGraphFMS}
 
-    result_g, cost_g, path =
+    result_g, cost_g, _, _, path =
          find_k_lowest_f_greedy( _G.G, 1, k,
                                  j -> dist_real( _G.m, j, q_real) )
 
-    _,dist_g = result_g[1]
+    dist_g = result_g[1][2][2]
     f_exact_g = ( dist_g == ℓ )
     s_dist_g = f_exact_g ? "Exact" : @sprintf( "%12g", dist_g )
     
@@ -734,7 +753,7 @@ function nng_build_and_permut!(
     while  ( !isempty( qadii ) )
         i_iter += 1
         curr, r_curr = peek( qadii )
-        _, new_rad = nng_nn_search_reg( G, curr )
+        new_rad = nng_nn_search_reg( G, curr, params.L )
         #println( "Okay!" )
         if  ( new_rad < 0.99 * r_curr )
             qadii[ curr ] = r_curr = new_rad
@@ -864,7 +883,8 @@ end
 
 """
 Given a set of vertices V in the metric of G, the following function
-robustly prune it as described in the Disk-Ann paper, iterative adding the closest point to the out-set, while removing its Apollonius ball from V. 
+robustly prune it as described in the Disk-Ann paper, 
+iterative adding the closest point to the out-set, while removing its Apollonius ball from V. 
 """
 function  robust_prune( G::NNGraphFMS, p, V::Set{Int},
                         α::Float64, max_size ) where {NNGraphFMS}
@@ -963,7 +983,7 @@ function  da_clean_inner( params, G, f_prune_curr::Bool, π::Vector{Int} )
             U = Set{Int}( outneighbors( G.G, π[ i ] ) )
             robust_prune_vertex!( G, π[ i ], U, params.α, params.Δ )
         end
-        result, V = nng_nn_search_all( G, π[ i ], L )
+        result, V, V_v_hop_val = nng_nn_search_all( G, π[ i ], L )
         out = robust_prune( G, π[ i ], V, α, Δ )
         for j ∈ out
             # π[ i ]???? Verify.
@@ -1000,7 +1020,7 @@ function  clean_shortcut_vertex( params, G, v )
         U = Set{Int}( outneighbors( G.G, v ) )
         robust_prune_vertex!( G, v, U, params.α, params.Δ )
     end
-    _, _, _, path =
+    _, _, _, _, path =
         find_k_lowest_f_greedy( G.G, 1, params.L, j -> dist( G.m, j, v ) )
     opath = shortcut_path( path, β )
     
@@ -1276,10 +1296,10 @@ end
 
 
 function  (@main)(args)
-    #m_i, m_q = input_random( 100, 10, 2 )
+    m_i, m_q = input_random( 100, 10, 2 )
     #m_i, m_q = input_random( 2000, 50, 20 )
     #m_i, m_q = input_sift_small()# # 25000, 1000, 8 )
-    m_i, m_q = input_sift()# # 100,000, 1000, 8 )
+    #m_i, m_q = input_sift()# # 100,000, 1000, 8 )
 
     params = NParams()
     params.α = 1.4 
