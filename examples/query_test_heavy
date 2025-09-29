@@ -1,0 +1,9 @@
+#! /bin/bash
+#src/metric_space.jl \
+#             data/siftsmall/siftsmall_base.fvecs \
+#             data/siftsmall/siftsmall_query.fvecs
+src/metric_space.jl \
+             data/siftsmall/sift_learn.fvecs \
+             data/siftsmall/sift_query.fvecs
+
+
