@@ -1,3 +1,4 @@
+using Base: StringMemory
 #! /bin/env julia
 
 #using DataStructures: cleanup!
@@ -1253,6 +1254,9 @@ function  cleaning( env, GG, G, clean::Int, str, desc,
     end
 end
 
+function  bstring( b::Bool )::String
+    return  b ? "T" : "F"
+end
 
 
 function  test_nn_queries( env, m_i, m_q )
@@ -1330,9 +1334,11 @@ function  test_nn_queries( env, m_i, m_q )
     function  inc_graph_shortcut( bfactor, clean::Int = 0,
             f_store_first = true, f_shortcut_inc = false,
            f_shortcut_clean = false )
-        println( "Inc graph shortcut construction (", bfactor, ")" )
-        m_inc = PermutMetric(  MPointsSpace( m_i, n ) )
-        str = "GSInc " * string( bfactor )
+        println( "GSInc graph shortcut construction (", bfactor, ")" )
+        m_inc = PermutMetric( MPointsSpace( m_i, n ) )
+        str = "GSInc " * string( bfactor ) * "_" * string(clean) * "_" *
+              bstring( f_store_first ) * bstring( f_shortcut_inc ) *
+              bstring( f_shortcut_clean )
         if  f_shortcut_inc
             str = str * "[SC]"
         end
@@ -1384,8 +1390,8 @@ function  test_nn_queries( env, m_i, m_q )
     #inc_prune_graph( 2.0, 1, false )
     #inc_prune_graph( 2.0, 1, true, true )
 
-    inc_graph_shortcut( 1.6, 1, false )
-    inc_graph_shortcut( 1.6, 1, false, false, true )
+    inc_graph_shortcut( 1.6, 1, true )
+    inc_graph_shortcut( 1.6, 1, true, false, true )
     inc_graph_shortcut( 1.6, 3, true, true )
     pgs_inc_graph_shortcut( 1.6, 3, true )
 
