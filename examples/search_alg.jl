@@ -46,7 +46,7 @@ end
     n_q::Int = 0
     
     ub_max_degree::Int = 12   # Max-degree upper bound
-    T::TimerOutput = TimerOutput()
+    T::Union{TimerOutput,Nothing} = TimerOutput()
     #GG::Vector{NNGraph} = Vector{NNGraph}()
     
     ring_factor::Float64 = 1.1
@@ -863,10 +863,10 @@ function nng_build_prune!( env::NEnv, m::PermutMetric{FMS}, factor::Float64 = 1.
 end
 
 
-function  input_deep1b()
+function  input_deep1b( n::Int = 0 )
     basedir = "data/deep1b/"
-    m_i = mmap_read_fbin( basedir * "base.10M.fbin" )
-    m_q = mmap_read_fbin( basedir * "query.public.10K.fbin" )
+    m_i = read_fbin_n( basedir * "base.10M.fbin", n )
+    m_q = read_fbin_n( basedir * "query.public.10K.fbin" )
     return  m_i, m_q
 end
 
@@ -1162,6 +1162,7 @@ function  clean_shortcut( env, G, _n::Int = 0 )
     println( "Clean shortcut" );
     for i ∈ 1:n
         clean_shortcut_vertex( env, G, π[ i ] )
+        #clean_shortcut_vertex( env, G, n+1-i )
     end
     
     return  G
@@ -1410,7 +1411,7 @@ function  test_nn_queries( env, m_i, m_q )
 
     #############################################################
 
-    acc = query_testing_inner( env, GG, m_i, m_q )
+    acc = query_testing_inner( env, GG, n, m_i, m_q )
     
     println( "\nn: ", n )
     println( "----------------------------------------------------" )
@@ -1442,7 +1443,7 @@ function  (@main)(args)
     #m_i, m_q = input_random( 2000, 50, 20 )
     #m_i, m_q = input_sift_small()# # 25000, 1000, 8 )
     #m_i, m_q = input_sift()# # 100,000, 1000, 8 )
-    m_i, m_q = input_deep1b()
+    m_i, m_q = input_deep1b( 200000 )
     
     @assert( size( m_i, 1 ) == size( m_i, 1 ) )
 
@@ -1462,7 +1463,7 @@ function  (@main)(args)
     env = NEnv()
     env.α = 1.4 
     env.β = 1.2 
-    env.L = 70
+    env.L = 50
     env.Δ = 10
     env.Δ_clean = 4 * env.Δ 
     env.ub_max_degree = env.Δ * 10
@@ -1471,11 +1472,9 @@ function  (@main)(args)
     env.n_q = n_q
     env.dim = dim
 
-    ###################################################
-    # Decide real number ofpoints to use
-    env.n = 100
-
     test_nn_queries( env, m_i, m_q )
+
+    env.T = nothing 
     dump( env )
 
     #show( env )

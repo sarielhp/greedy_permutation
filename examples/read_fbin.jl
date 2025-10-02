@@ -5,11 +5,7 @@ using LinearAlgebra
 using Statistics
 using Mmap
 
-"""
-                  IO Utils
-"""
-
-
+### Seems unstable under WSL. Yuk.
 function mmap_read_fbin( filename::String )
     # Gets dimensions...
     f = open(filename, "r")
@@ -25,7 +21,8 @@ function mmap_read_fbin( filename::String )
     return  m
 end
 
-function read_fbin(filename::String, start_idx::Int=0, chunk_size::Union{Int, Nothing}=nothing)
+function read_fbin(filename::String,
+                   start_idx::Int=0, chunk_size::Union{Int, Nothing}=nothing)
     """ Read *.fbin file that contains Float32 vectors
     Args:
         :param filename (String): path to *.fbin file
@@ -61,6 +58,29 @@ function read_fbin(filename::String, start_idx::Int=0, chunk_size::Union{Int, No
 
     return  m
 end
+
+function read_fbin_n(filename::String, n::Int = 0)
+    f = open(filename, "r")
+    nvecs = read(f, Int32)
+    dim = read(f, Int32)
+
+    if  n != 0 
+        nvecs = min( nvecs, n )
+    end
+    seek(f, 8 )
+    
+    arr = Vector{Float32}(undef, nvecs * dim)
+    readbytes!(f, reinterpret(UInt8, arr))
+    
+    close(f)
+    m = reshape(arr, ( dim, nvecs ) )
+
+    #println( "Rows : ", size( m, 1 ) )
+    #println( "Cols : ", size( m, 2 ) )
+
+    return  m
+end
+
 
 function read_ibin(filename::String, start_idx::Int=0, chunk_size::Union{Int, Nothing}=nothing)
     """ Read *.ibin file that contains Int32 vectors
