@@ -1,8 +1,5 @@
 #! /bin/env julial
 
-#using DataStructures: cleanup!
-println( "STarting" )
-
 push!(LOAD_PATH, pwd()*"/src/cg/")
 push!(LOAD_PATH, pwd()*"/src/" )
 
@@ -1271,11 +1268,15 @@ function  test_nn_queries( env, m_i, m_q )
     println( "Dimension: ", d )
     println( "n        : ", n )
     println( "n_q      : ", n_q )
+    flush( stdout )
     
     PS = MPointsSpace( m_i, n )
     
     println( "Computing greedy permutation" )
+    flush( stdout )
     @timeit T "Greedy Permutation" I, D = greedy_permutation_naive( PS, n )
+    println( "Computing greedy permutation done." )
+    flush( stdout )
     
     
     f_check_slow = false
@@ -1288,6 +1289,7 @@ function  test_nn_queries( env, m_i, m_q )
     
     function  greedy_graph( env, bfactor, clean::Int = 0  )
         println( "Building greedy graph ", bfactor )
+        flush( stdout );
         str = "GGraph " * string( bfactor )
         @timeit T str begin
             @timeit T "building" G = nng_greedy_graph( env, n, m_i, I, D, bfactor )
@@ -1347,8 +1349,10 @@ function  test_nn_queries( env, m_i, m_q )
         end
         
         @timeit T str begin
-            G, _ = nng_build_and_permut!( env,
-                m_inc, bfactor, false, f_shortcut_inc, f_shortcut_clean )
+            @timeit T "building" begin
+                G, _ = nng_build_and_permut!( env,
+                    m_inc, bfactor, false, f_shortcut_inc, f_shortcut_clean )
+            end
             description!( G, str )
             if  f_store_first 
                 push!( GG, G )
@@ -1378,7 +1382,7 @@ function  test_nn_queries( env, m_i, m_q )
     ####################################################################
     ####################################################################
     #greedy_graph( 1.1 )
-    greedy_graph( env, 1.6, 1 )
+    #greedy_graph( env, 1.6, 1 ) # Complete waste of time
     #greedy_graph( env, 2.0, 1 )
                 
     #inc_graph( 1.3 )
@@ -1399,7 +1403,11 @@ function  test_nn_queries( env, m_i, m_q )
 
 
     ##########################################################################
+    println( "Computing DiskAnn..." )
+    flush( stdout )
     @timeit T "DiskAnn" G_disk_ann = disk_ann_build_graph( env, MPointsSpace( m_i ) )
+    println( "Computing DiskAnn done..." )
+
     description!( G_disk_ann, "DiskAnn(" * string( env.α )
                               * "," * string( env.L )
                 * "," * string(env.Δ) )
@@ -1407,12 +1415,15 @@ function  test_nn_queries( env, m_i, m_q )
     flush( stdout )
 
     ##########################################################################
+    println( "Computing DiskAnnHope..." )
+    flush( stdout )
     @timeit T "DiskAnnH" G_disk_ann_h = disk_ann_build_graph( env,
         MPointsSpace( m_i, n ), true )
     description!( G_disk_ann_h, "DiskAnnHOP(" * string( env.α )
                               * "," * string( env.L )
                 * "," * string(env.Δ) )
     push!( GG, G_disk_ann_h )
+    println( "     done..." )
     flush( stdout )
 
     #############################################################
@@ -1445,11 +1456,21 @@ end
 
 
 function  (@main)(args)
-    #m_i, m_q = input_random( 100, 10, 40 )
-    #m_i, m_q = input_random( 2000, 50, 20 )
-    #m_i, m_q = input_sift_small()# # 25000, 1000, 8 )
-    #m_i, m_q = input_sift()# # 100,000, 1000, 8 )
-    m_i, m_q = input_deep1b( 300_000 )
+    println( "Starting..." )
+    flush( stdout )
+    env = NEnv()
+
+    println( "Reading input" )
+    flush( stdout )
+    @timeit env.T "Reading input" begin
+        m_i, m_q = input_random( 100, 10, 40 )
+        #m_i, m_q = input_random( 2000, 50, 20 )
+        #m_i, m_q = input_sift_small()# # 25000, 1000, 8 )
+        #m_i, m_q = input_sift()# # 100,000, 1000, 8 )
+        #m_i, m_q = input_deep1b( 500_000 )
+    end
+    println( "Reading done" )
+    flush( stdout )
     
     @assert( size( m_i, 1 ) == size( m_i, 1 ) )
 
@@ -1466,7 +1487,8 @@ function  (@main)(args)
     println( "dim : ", dim )
     println( "n   : ", n )
     println( "n_q : ", n_q )
-    env = NEnv()
+    flush( stdout )
+
     env.α = 1.4 
     env.β = 1.2 
     env.L = 50
@@ -1483,6 +1505,11 @@ function  (@main)(args)
     env.T = nothing 
     dump( env )
 
+    println( "-----------------------------------------------------" )
+    println( "dim : ", dim )
+    println( "n   : ", n )
+    println( "n_q : ", n_q )
+    
     #show( env )
     #println( env )
     
