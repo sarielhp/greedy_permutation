@@ -1,6 +1,7 @@
-#! /bin/env julia
+#! /bin/env julial
 
 #using DataStructures: cleanup!
+println( "STarting" )
 
 push!(LOAD_PATH, pwd()*"/src/cg/")
 push!(LOAD_PATH, pwd()*"/src/" )
