@@ -1,4 +1,3 @@
-using Base: StringMemory
 #! /bin/env julia
 
 #using DataStructures: cleanup!
@@ -1449,7 +1448,7 @@ function  (@main)(args)
     #m_i, m_q = input_random( 2000, 50, 20 )
     #m_i, m_q = input_sift_small()# # 25000, 1000, 8 )
     #m_i, m_q = input_sift()# # 100,000, 1000, 8 )
-    m_i, m_q = input_deep1b( 200000 )
+    m_i, m_q = input_deep1b( 200 )
     
     @assert( size( m_i, 1 ) == size( m_i, 1 ) )
 

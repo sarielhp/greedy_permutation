@@ -1,0 +1,15 @@
+#! /bin/bash
+
+DIR=results/`date +%y/%m/%d`/
+mkdir -p $DIR
+DT=`datestrext`
+FL=$DIR$DT".txt"
+
+echo $FL
+echo "examples/search_alg.jl >& $FL"
+examples/search_alg.jl >& $FL
+
+exit
+#src/metric_space.jl
+#examples/search_alg.jl >& results/sift_`datestrext`.txt
+
