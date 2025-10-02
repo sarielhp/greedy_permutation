@@ -1463,11 +1463,11 @@ function  (@main)(args)
     println( "Reading input" )
     flush( stdout )
     @timeit env.T "Reading input" begin
-        m_i, m_q = input_random( 100, 10, 40 )
+        #m_i, m_q = input_random( 100, 10, 40 )
         #m_i, m_q = input_random( 2000, 50, 20 )
         #m_i, m_q = input_sift_small()# # 25000, 1000, 8 )
         #m_i, m_q = input_sift()# # 100,000, 1000, 8 )
-        #m_i, m_q = input_deep1b( 500_000 )
+        m_i, m_q = input_deep1b( 500_000 )
     end
     println( "Reading done" )
     flush( stdout )
