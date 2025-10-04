@@ -75,3 +75,33 @@ function delete_fast!(vec::Vector, pos)
 
     return vec
 end
+
+function find_first_available_file( env, out_dir )
+    existing_files = readdir( out_dir )
+
+#    println( existing_files )
+#    exit( -1 );
+    while  true
+        env.out_file_count += 1;
+        i = env.out_file_count += 1;
+
+        # Use `@sprintf` to format the integer `i` as a 5-digit string,
+        # padding with leading zeros if necessary.
+        bfilename = @sprintf("%08d.txt", i )
+        filename = @sprintf("%s/%s", out_dir, bfilename )
+
+        #println( "exists? ", filename in existing_files )
+        if !(filename in existing_files)
+            return filename
+        end
+    end
+
+    return nothing
+end
+
+function create_dir_from_file(filename)
+    dir_path = dirname(filename)
+    if !isempty(dir_path)
+        mkpath(dir_path)
+    end
+end

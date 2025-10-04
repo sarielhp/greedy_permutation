@@ -6,12 +6,14 @@ push!(LOAD_PATH, pwd()*"/src/" )
 using Graphs
 using Distances
 using DataStructures
-using Printf
+using Printf, Format
 using Random
 using Accessors
+using DiGraphRW
+using JLD2
 #using PlotGraphviz
 
-using SimpleWeightedGraphs
+#using SimpleWeightedGraphs
 
 using TimerOutputs
 
@@ -36,12 +38,18 @@ end
     α::Float64 = 0.0
     β::Float64 = 0.0
     L::Int = 40
-    Δ::Int64 = 4     # Max-degree
-    Δ_clean::Int64 = 8     # Max-degree used as threshold for cleaning
+    R::Int64 = 4     # Max-degree
+    R_clean::Int64 = 8     # Max-degree used as threshold for cleaning
 
     dim::Int = 0
     n::Int = 0
     n_q::Int = 0
+
+    f_load = true  # Load graph from file if exists
+    f_save = true  # Save graph to file
+    data_dir::String = "data/"
+    input_name::String = "undef" 
+    saves_dir::String = "saves/"
     
     ub_max_degree::Int = 12   # Max-degree upper bound
     T::Union{TimerOutput,Nothing} = TimerOutput()
@@ -60,12 +68,13 @@ mutable struct NNGraph{FMS <: AbstractFMetricSpace, DGraph}
     m::FMS
     G::DGraph
     desc::String
+    filename::String
 end
 
 function  NNGraph( env::NEnv, _m::FMS, _n::Int, G::DGraph ) where{FMS, DGraph}
     #    _n = size( _m )
     #DiGraph( _n )
-    return NNGraph{FMS,DGraph}( env, _n, _m, G, "" )
+    return NNGraph{FMS,DGraph}( env, _n, _m, G, "", "" )
 end        
 
 function  description!( G::NNGraphF, _desc::String ) where {NNGraphF}
@@ -186,29 +195,6 @@ function find_k_lowest_f(G, u::Int, k::Int, f )
 end
 
 
-function find_first_available_file( env, out_dir )
-    existing_files = readdir( out_dir )
-
-#    println( existing_files )
-#    exit( -1 );
-    while  true
-        env.out_file_count += 1;
-        i = env.out_file_count += 1;
-
-        # Use `@sprintf` to format the integer `i` as a 5-digit string,
-        # padding with leading zeros if necessary.
-        bfilename = @sprintf("%08d.txt", i )
-        filename = @sprintf("%s/%s", out_dir, bfilename )
-
-        #println( "exists? ", filename in existing_files )
-        if !(filename in existing_files)
-            return filename
-        end
-    end
-
-    return nothing
-end
-
 TVerHopVal = Tuple{Int,Int,Float64}
 
 function  dump_visited( env, _V::Vector{TVerHopVal} )
@@ -236,6 +222,21 @@ struct  QEntry
     prev::Int     # previous vertex in the BFS
     dist::Float64    
 end
+
+
+function  extract_path( v, vals_f, prev, path )
+    while v > 0
+        v_val = vals_f[ v ]
+        push!( path, (v, v_val) )
+        if  v == 1
+            v = 0
+        else
+            v = prev[ v ]        
+        end
+    end
+    return  path
+end
+
 """
     find_k_lowest_f_greedy(env, G, u::Int, k::Int, f)
 
@@ -281,7 +282,7 @@ Returns
   efficient) pruning might be possible.
 
 """
-function find_k_lowest_f_greedy(env, G, u::Int, k::Int, f )
+function find_k_lowest_f_greedy(env, G, u::Int, k::Int, f; f_path = false )
     @assert( k > 0 )
     
     # Use a PriorityQueue to store vertices to visit, prioritized by their f value.
@@ -338,7 +339,7 @@ function find_k_lowest_f_greedy(env, G, u::Int, k::Int, f )
     end
 
     # Threshold for greedy jump. This constant maybe should be optimized?
-    δ = 0.7
+    δ = 0.9
 
     #####################################################################
     ### The real work starts... #########################################
@@ -377,8 +378,7 @@ function find_k_lowest_f_greedy(env, G, u::Int, k::Int, f )
         #-------------------------------------------------------------------------
         # Trim the result queue so that it does not contains more than k results
         #-------------------------------------------------------------------------
-        ℓ = length( result )
-        if  ( ℓ >= k )
+        if  ( length( result ) >= k )
             f_threshold = true
             while  ( length( result ) > k )
                 dequeue!( result )
@@ -396,7 +396,7 @@ function find_k_lowest_f_greedy(env, G, u::Int, k::Int, f )
         N = outneighbors(G, v)
         f_copy = false
         for  o ∈ N
-            if  ( o ∈ visited )
+            if  ( o ∈ visited  ||  o ∈ queued )
                 continue
             end
             # Not that we *must* evaluate f on o, so we might as well do it now...
@@ -424,34 +424,23 @@ function find_k_lowest_f_greedy(env, G, u::Int, k::Int, f )
     cl = collect( result )    
     rs::Vector{QEntry} = [cl[i][2]  for i ∈ length(cl):-1:1]
 
-    function  extract_path( v )
-        path = Vector{Tuple{Int,Float64}}()
-        while v > 0
-            v_val = vals_f[ v ]
-            push!( path, (v, v_val) )
-            if  v == 1
-                v = 0
-            else
-                v = prev[ v ]        
-            end
-        end
-        return  path
+    path = Vector{Tuple{Int,Float64}}()
+    if  f_path
+        extract_path( rs[ 1 ].vertex, vals_f, prev, path )
     end
-
-    path = extract_path( rs[ 1 ].vertex )
     
     return   rs, cost, visited, visited_out, path
 end
 
 
-function  nn_add_edges!( env, G, m, i, r_i, factor, Δ )
+function  nn_add_edges!( env, G, m, i, r_i, factor, R )
     function  dist_to_i( j )
         return  dist( m, i, j )
     end
 
     out = Vector{Int}()
     result, _ = find_k_lowest_f_greedy(env, G, 1, env.L, dist_to_i )
-    forced::Int = 1 #Δ/2 #3
+    forced::Int = 1 
     for ent ∈ result
         #(u, (hop,dista))
         u = ent.vertex
@@ -473,7 +462,7 @@ end
 
 function vertex_prune!( env, _G, v )
     U = Set{Int}( outneighbors( _G.G, v ) )
-    robust_prune_vertex!( _G, v, U, env.α, env.Δ )
+    robust_prune_vertex!( _G, v, U, env.α, env.R )
 end
 
 function  add_edge_and_prune!( env, _G, u, v )
@@ -481,7 +470,7 @@ function  add_edge_and_prune!( env, _G, u, v )
         return
     end
 
-    if  ( outdegree( _G.G, u ) >= env.Δ_clean )
+    if  ( outdegree( _G.G, u ) >= env.R_clean )
         vertex_prune!( env, _G, u )
     end
     
@@ -511,7 +500,7 @@ Compute all the vertices that in distance at most r_i * factor from v,
 and then prunes them to make sure there not too many of them, and
 create edges from the survivors of the pruning to v.
 """
-function  nn_add_edges_prune( env, G, m, v, r_i, factor, Δ )
+function  nn_add_edges_prune( env, G, m, v, r_i, factor, R )
     function  dist_to_v( j )
         return  dist( m, v, j )
     end
@@ -567,7 +556,8 @@ function nng_greedy_dag!(_G::NNGraph{FMS},
     n::Int,
     factor::Float64=1.1
 ) where {FMS}
-    println( "n: ", n )
+    @printf( "n    : ", format( n, commas=true ) )
+    #@printf( "n_q  : %10'd\n", n_q)
     G = _G.G
     m = _G.m
     k = 200
@@ -620,7 +610,8 @@ function  nng_nn_search_all( env, _G::NNGraph{FMS},
                              q::Int,
                                  L::Int = 20
                                 ) where {FMS}
-    result, _, visited, visited_out,_ = find_k_lowest_f_greedy( env, _G.G, 1, L, j -> dist( _G.m, j, q ) )
+    result, _, visited, visited_out,_ =
+         find_k_lowest_f_greedy( env, _G.G, 1, L, j -> dist( _G.m, j, q ) )
 
     return  result, visited, visited_out
 end
@@ -725,7 +716,7 @@ function nng_build_and_permut!(
     @assert( size( m ) == n ) 
     G = NNGraph( env, m, n, env.init_graph( n, env.ub_max_degree ) )
 
-    Δ = env.Δ
+    R = env.R
     R = fill( -1.0, n )
     R[ 1 ] = 0.0
 
@@ -736,7 +727,7 @@ function nng_build_and_permut!(
         enqueue!( qadii, i, R[ i ] )
     end
 
-    println( "n = ", n )
+    println( "n    : ", format(n, commas=true ) )
     i::Int = 2
     c_count = 0
     i_iter::Int = 0
@@ -769,7 +760,7 @@ function nng_build_and_permut!(
         handled += 1
         
         # Now we need to add the edges to the DAG...
-        N = nn_add_edges!( env, G.G, m, i, r_i, factor, env.Δ )
+        N = nn_add_edges!( env, G.G, m, i, r_i, factor, env.R )
 
         if   f_shortcut
             clean_shortcut_vertex( env, G, i )
@@ -778,9 +769,9 @@ function nng_build_and_permut!(
         # Pruning is done only after we constructed at least half the graph...
         if   f_prune  ||  f_shortcut #( f_prune  &&  ( handled > (n/2) ) )
             for v ∈ N
-                if  outdegree( G.G, v ) > 4*env.Δ
+                if  outdegree( G.G, v ) > 4*env.R
                     U = Set{Int}( outneighbors( G.G, v ) )
-                    robust_prune_vertex!( G, v, U, env.α, 2*env.Δ )
+                    robust_prune_vertex!( G, v, U, env.α, 2*env.R )
                 end
             end                    
         end
@@ -800,7 +791,7 @@ end
 
 function  queue_points( m )
     n = size( m )
-    println( "n: ", n )
+    println( "n    : ", format(n, commas=true ) )
     R = fill( -1.0, n )
     qadii = PriorityQueue{Int, Float64}(Base.Reverse)
     for i ∈ 2:n
@@ -850,7 +841,7 @@ function nng_build_prune!( env::NEnv, m::PermutMetric{FMS}, factor::Float64 = 1.
         handled += 1
         
         # Now we need to add the edges to the DAG...
-        nn_add_edges_prune( env, G, m, i, r_i, factor, env.Δ )
+        nn_add_edges_prune( env, G, m, i, r_i, factor, env.R )
 
         R[ i ] = r_curr
         
@@ -869,23 +860,62 @@ function  input_deep1b( n::Int = 0 )
 end
 
 
-function  input_sift_small()
+function  input_sift_small( env )
     basedir = "data/sift/"
-    m_i = read_fvecs( basedir * "small_learn.fvecs" )
+    env.input_name = "sift_small";
+
+    m_i = read_fvecs( basedir * "small_base.fvecs" )
     m_q = read_fvecs( basedir * "small_query.fvecs" )
     return  m_i, m_q
 end
 
-function  input_sift()
+function  input_sift( env, n::Int = 0 )
     basedir = "data/sift/"
-    m_i = read_fvecs( basedir * "learn.fvecs" )
+    env.input_name = "sift";
+    m_i = read_fvecs( basedir * "base.fvecs" )
+    if  ( n > 0 )
+        m_i = m_i[ :, 1:n ]
+    end
+
+    env.input_name = "sift";
     m_q = read_fvecs( basedir * "query.fvecs" )
+        
     return  m_i, m_q
 end
 
+compute_input_filename( env ) = env.data_dir * "gen/" * env.input_name * ".jld2"
 
-function  input_random( n, n_q, d )
-    return   rand( d, n ), rand( d, n_q )
+function  load_input( env )
+    fln = compute_input_filename( env )
+    if  isfile( fln )
+        @load fln m_i m_q
+        println( "Input loaded from: ", fln )
+        flush( stdout )
+        return  true, m_i, m_q
+    end
+    return  false, Matrix{Float64}(), Matrix{Float64}()
+end
+
+function  save_input( env, m_i, m_q )
+    fln = compute_input_filename( env )
+    create_dir_from_file( fln )
+    @save fln m_i m_q
+end
+
+
+function  input_random( env, n, n_q, d )
+    env.input_name = "rand_n" * string(n)* "_q"*string(n_q)*"_d"*string(d);
+    f_load, m_i, m_q = load_input( env )
+    if  f_load
+        println( "Loaded input..." )
+        return  m_i, m_q
+    end
+    m_i_, m_q_ = rand( d, n ), rand( d, n_q )
+    if   env.f_save
+        save_input( env, m_i_, m_q_ )
+    end
+
+    return  m_i, m_q
 end
 
 
@@ -928,7 +958,7 @@ function  check_greedy_dag_failure_slow( env, m_i, m_q, I, D, factor )
             println( "real_dist : ", real_dist )
             println( "Query: ", m_q[ :, i ] )
 
-            G = SimpleWeightedDiGraph( GB.G )
+            G = DiGraph( GB.G )
             dot = plot_graphviz( G )
             write_dot_file( G, "test.dot" )
 
@@ -970,65 +1000,63 @@ function  robust_prune( G::NNGraphFMS, p, V::Set{Int},
         if  ( length( out ) >= max_size )
             break
         end
-        del_list = Vector{Int}()
         for xp ∈ pq
             x = xp[1]
             if   α * dist( G.m, v, x ) <= dist( G.m, p, x )
-                push!( del_list, x )
+                delete!( pq, x )
             end
-        end
-        for x ∈ del_list
-            delete!( pq, x )
         end
     end
     
     return out
 end
 
-function  robust_prune_hop( env, G::NNGraphFMS, p, pq::Vector{TVerHopVal},
-                        α::Float64, max_size ) where {NNGraphFMS}
-    pq     = PriorityQueue{Int, Float64}()
-
-    for  o ∈ N
-        enqueue!( pq, o, dist( G.m, p, o ) )
-    end
+function  robust_prune_hop!( env, G, p::Int, res::Vector{QEntry} )
+    α, R = env.α, env.R
 
     out = Set{Int}()
-    while  ( ! isempty( pq ) )
-        i = argmin( pq, by = x -> x[ 3 ]) # get vertex with minimum distance
-        v_val = pq[ i ][ 3 ]
+    while  ( ! isempty( res ) )
+        i = argmin( ent.dist  for ent ∈ res )
+
+        v_val = res[ i ].dist
         ub = v_val * env.ring_factor
 
         # get vertex with distance in same ring as minimum distance ring, and
         # minimal hop distance...
-        pq_filtered = filter(t -> ( v_val <= t[3] <= ub), pq)
-        ihop = argmin( pq, by = x -> x[ 2 ])
-
-        v, _, v_val = pq_filtered[ ihop ]
+        res_filtered = filter(t -> ( v_val <= t.dist <= ub), res)
+        #println( typeof( res_filtered ) )
+        #println( length( res_filtered ) )
+        #dump( res_filtered )
         
+        ihop = argmin( x.hop_dist  for x ∈ res_filtered )
+#        res_filtered, by =   [ 2 ])
+
+        ent = res_filtered[ ihop ]
+        v, v_val = ent.vertex, ent.dist
+        #v, v_val = pq_filtered[ ihop ]        
         #v, v_hop, v_val = find_minimal_vertex( pq )
         
         push!( out, v )
-        if  ( length( out ) >= max_size )
+        if  ( length( out ) >= R )
             break
         end
-        for i ∈ length( pq ):-1:1
-            xp = pq[ i ]
-            x = xp[ 1 ]
-            if  ( x == v )  ||  ( α * dist( G.m, v, x ) <= dist( G.m, p, x ) )
-                delete_fast!( pq, i )
+        for i ∈ length( res ):-1:1
+            ent = res[ i ]
+            x = ent.vertex
+            if  ( ( ent.vertex == v )
+                  ||  ( α * dist( G.m, v, x ) <= dist( G.m, p, x ) ) )
+                delete_fast!( res, i )
             end
         end
     end
     
-    return out
+    return  out
 end
 
 
 function  robust_prune_vertex!( G::NNGraphFMS, p, V::Set{Int},
-                           α, max_size ) where {NNGraphFMS}
-    out =  robust_prune( G, p, V, α, max_size )
-
+                           α, R ) where {NNGraphFMS}
+    out =  robust_prune( G, p, V, α, R )
     
     neighbors_to_delete = Set{Int}( collect( outneighbors(G.G, p) ) )
     del_list = setdiff( neighbors_to_delete, out )
@@ -1065,6 +1093,10 @@ function generate_directed_random_graph(n::Int, d::Int)
     G = DiGraph(n)
 
     for  i ∈ 1:d
+        if  ( n > 100000 )
+            print( "            round: ", i, "/", d, "    \r" )
+            flush( stdout )
+        end
         p = random_perm_no_selfies( n )
         for  i ∈ 1:n
             if  ! has_edge( G, i, p[ i ] )
@@ -1073,30 +1105,49 @@ function generate_directed_random_graph(n::Int, d::Int)
         end
     end
 
+    println( "" );
+    
     return G
 end
 
-function  da_clean_inner( env, G, f_prune_curr::Bool, π::Vector{Int},
+function  da_clean_inner( env, G, π::Vector{Int};
                           f_hop_clean = false )
-    α, Δ, L = env.α, env.Δ, env.L
-    n = env.n 
+    α, R, L = env.α, env.R, env.L
+    RX = R + 10
+    n = env.n
+
+    rpv::Int = 0
     for i ∈ 1:n
-        if  ( f_prune_curr  &&  ( outdegree( G.G, π[ i ] ) > Δ ) )
+        #if  ( i & 0x7ff ) == 0 
+        #    @printf( "%10d   \r", i )
+        #    flush( stdout )
+        #end
+#=        if  ( f_prune_curr  &&  ( outdegree( G.G, π[ i ] ) > R ) )
             U = Set{Int}( outneighbors( G.G, π[ i ] ) )
-            robust_prune_vertex!( G, π[ i ], U, env.α, env.Δ )
+            robust_prune_vertex!( G, π[ i ], U, env.α, env.R )
+        end =#
+        #XXX
+        _, cost, V, V_v_hop_val,_ =
+           find_k_lowest_f_greedy( env, G.G, 1, L, j -> dist( G.m, j, π[i] ) )
+
+        #_, V, V_v_hop_val = nng_nn_search_all( env, G, π[ i ], L )
+        if  ( i & 0xfff ) == 0 
+            println( "cost: ", cost, " size V: ", length( V ), " i: ", i,
+                "/", format( n, commas=true ),  "  rpv: ", rpv )
         end
-        _, V, V_v_hop_val = nng_nn_search_all( env, G, π[ i ], L )
+        flush( stdout ) 
         if  f_hop_clean 
-            out = robust_prune_hop( G, π[ i ], V_v_hop_val, α, Δ )
+            out = robust_prune_hop!( env, G, π[ i ], V_v_hop_val )
         else
-            out = robust_prune( G, π[ i ], V, α, Δ )
+            out = robust_prune( G, π[ i ], V, α, R )
         end
         for j ∈ out
-            # π[ i ]???? Verify.
-            if  ( outdegree( G.G, j ) >= Δ )
+            # π[ i ]???? Verify
+            if  ( outdegree( G.G, j ) >= RX )
                 U = Set{Int}( outneighbors( G.G, j ) )
                 push!( U, π[ i ] )
-                robust_prune_vertex!( G, j, U, α, Δ )
+                robust_prune_vertex!( G, j, U, α, R )
+                rpv += 1
             else
                 add_edge!( G.G, j, π[ i ] )
                 @assert( outdegree( G.G, j ) <= env.ub_max_degree )
@@ -1107,29 +1158,29 @@ function  da_clean_inner( env, G, f_prune_curr::Bool, π::Vector{Int},
     return  G
 end
 
-function  da_clean( env, G, f_prune_curr::Bool = false,
-                    f_hop_prune::Bool = false )
+function  da_clean( env, G; f_hop_clean::Bool = false )
     n = size( G.m )
     π = randperm(n)
-    return  da_clean_inner( env, G, f_prune_curr, π )
+    return  da_clean_inner( env, G, π, f_hop_clean=f_hop_clean )
 end
 
-function  da_clean_rev( env, G, f_prune_curr::Bool = false )
+function  da_clean_rev( env, G, f_hop_prune::Bool = false )
     n = size( G.m )
     π = [i for i ∈ n:-1:1]
-    return  da_clean_inner( env, G, f_prune_curr, π )
+    return  da_clean_inner( env, G, π, f_hop_prune )
 end
 
 
 function  clean_shortcut_vertex( env, G, v )
-     _, Δ, _, β = env.α, env.Δ, env.L, env.β 
+     _, R, _, β = env.α, env.R, env.L, env.β 
 
-    if  ( outdegree( G.G, v ) > Δ )
+    if  ( outdegree( G.G, v ) > R )
         U = Set{Int}( outneighbors( G.G, v ) )
-        robust_prune_vertex!( G, v, U, env.α, env.Δ )
+        robust_prune_vertex!( G, v, U, env.α, env.R )
     end
     _, _, _, _, path =
-        find_k_lowest_f_greedy( env, G.G, 1, env.L, j -> dist( G.m, j, v ) )
+        find_k_lowest_f_greedy( env, G.G, 1, env.L, j -> dist( G.m, j, v ),
+                                f_path = true )
     opath = shortcut_path( path, β )
     
     for i ∈ 1:length( opath ) - 1
@@ -1142,9 +1193,9 @@ function  clean_shortcut_vertex( env, G, v )
             add_edge!( G.G, x, y )
         end
         
-        if  ( outdegree( G.G, x ) > Δ )
+        if  ( outdegree( G.G, x ) > R )
             U = Set{Int}( outneighbors( G.G, x ) )
-            robust_prune_vertex!( G, x, U, env.α, env.Δ )
+            robust_prune_vertex!( G, x, U, env.α, env.R )
         end
     end
 end
@@ -1155,7 +1206,7 @@ function  clean_shortcut( env, G, _n::Int = 0 )
     n = ( _n == 0 ) ? size( G.m ) : _n;
     
     π = randperm(n)
-    #α, Δ, L, β = env.α, env.Δ, env.L, env.β 
+    #α, R, L, β = env.α, env.R, env.L, env.β 
 
     println( "Clean shortcut" );
     for i ∈ 1:n
@@ -1167,14 +1218,36 @@ function  clean_shortcut( env, G, _n::Int = 0 )
 end
 
 
-function  disk_ann_build_graph( env, m, f_hop_prune = false )
+function  disk_ann_build_graph( env, m; f_hop_clean = false )
     n = size( m )
-    _G = generate_directed_random_graph( n, 2 * env.Δ )
-    G = NNGraph( env, n, m, _G, "disk_ann" )
-    #L = 20
+    println( "      Random graph..." )
+    flush( stdout )
+    @timeit env.T "Rand Graph" _G = generate_directed_random_graph( n, env.R )
+    G = NNGraph( env, n, m, _G, "disk_ann", "" )
+    hop_clean_str = f_hop_clean ? "_H_" : "_"
+    G.filename = env.saves_dir * "da" * hop_clean_str * env.input_name*"_n" *
+                  string(n)*"_R"*string(env.R) * ".bin"
+
+    if  env.f_load
+        if  isfile( G.filename )
+            G.G = graphRead( G.filename ) 
+            return
+        end
+    end
     
-    da_clean( env, G, f_hop_prune )
-    da_clean( env, G, f_hop_prune )
+    println( "      Clean 1..." )
+    flush( stdout )
+    @timeit env.T "Clean 1" da_clean( env, G; f_hop_clean=f_hop_clean )
+
+    println( "      Clean 2..." )
+    flush( stdout )
+    @timeit env.T "Clean 2" da_clean( env, G; f_hop_clean=f_hop_clean )
+
+    if  env.f_save
+        create_dir_from_file( G.filename )
+        graphWrite( G.filename, G.G )
+        H = graphRead( G.filename )
+    end
     
     return  G
 end
@@ -1256,6 +1329,73 @@ function  bstring( b::Bool )::String
 end
 
 
+function  greedy_permtuation( env, m_i, n, m_q )
+    PS = MPointsSpace( m_i, n )
+    println( "Computing greedy permutation" )
+    flush( stdout )
+    @timeit env.T "Greedy Permutation" I, D = greedy_permutation_naive( PS, n )
+    println( "Computing greedy permutation done." )
+    flush( stdout )
+    
+    
+    f_check_slow = false
+    if  ( f_check_slow )
+        println( "Checking that the greedy DAG indeed works!" )
+        check_greedy_dag_failure_slow( m_i, m_q, I, D, 1.01 )
+    end
+    return  I, D
+end
+
+
+
+function  greedy_graph( env, GG, bfactor, clean::Int = 0  )
+    println( "Building greedy graph ", bfactor )
+    flush( stdout );
+    str = "GGraph " * string( bfactor )
+    @timeit T str begin
+        @timeit T "building" G = nng_greedy_graph( env, n, m_i, I, D, bfactor )
+        desc_str = "Greedy (" * string( bfactor ) * ")"
+        
+        description!( G, desc_str )
+        push!( GG, G )
+        
+        cleaning( env, GG, G, clean, str, desc_str )
+        
+        println( "Done\n" )
+        flush( stdout )            
+    end
+end
+
+
+function  disk_ann_compute( env, GG, m_i, n )
+    println( "Computing DiskAnn..." )
+    flush( stdout )
+    @timeit env.T "DiskAnn" G_disk_ann =
+               disk_ann_build_graph( env, MPointsSpace( m_i, n ) )
+    println( "Computing DiskAnn done..." )
+    
+    description!( G_disk_ann, "DiskAnn(" * string( env.α )
+                              * "," * string( env.L )
+                              * "," * string(env.R) )
+    push!( GG, G_disk_ann )
+    flush( stdout )
+end
+
+
+function  disk_ann_hop_compute( env, GG, m_i, n )
+    println( "Computing DiskAnnHop..." )
+    flush( stdout )
+    @timeit env.T "DiskAnnH" G_disk_ann_h =
+           disk_ann_build_graph( env, MPointsSpace( m_i, n ); f_hop_clean=true )
+
+    description!( G_disk_ann_h, "DiskAnnHOP(" * string( env.α )
+                              * "," * string( env.L )
+                * "," * string(env.R) )
+    push!( GG, G_disk_ann_h )
+    println( "     done..." )
+    flush( stdout )
+end
+
 function  test_nn_queries( env, m_i, m_q )
     n = env.n
     n_q = env.n_q
@@ -1266,44 +1406,11 @@ function  test_nn_queries( env, m_i, m_q )
     @assert( 0 < n <= size( m_i, 2 ) )
     
     println( "Dimension: ", d )
-    println( "n        : ", n )
-    println( "n_q      : ", n_q )
+    println( "n    : ", format(n, commas=true ) )
+    println( "n_Q  : ", format(n_q, commas=true ) )
     flush( stdout )
     
-    PS = MPointsSpace( m_i, n )
-    
-    println( "Computing greedy permutation" )
-    flush( stdout )
-    @timeit T "Greedy Permutation" I, D = greedy_permutation_naive( PS, n )
-    println( "Computing greedy permutation done." )
-    flush( stdout )
-    
-    
-    f_check_slow = false
-    if  ( f_check_slow )
-        println( "Checking that the greedy DAG indeed works!" )
-        check_greedy_dag_failure_slow( m_i, m_q, I, D, 1.01 )
-    end
-
     GG = Vector{NNGraph}()
-    
-    function  greedy_graph( env, bfactor, clean::Int = 0  )
-        println( "Building greedy graph ", bfactor )
-        flush( stdout );
-        str = "GGraph " * string( bfactor )
-        @timeit T str begin
-            @timeit T "building" G = nng_greedy_graph( env, n, m_i, I, D, bfactor )
-            desc_str = "Greedy (" * string( bfactor ) * ")"
-            
-            description!( G, desc_str )
-            push!( GG, G )
-            
-            cleaning( env, GG, G, clean, str, desc_str )
-            
-            println( "Done\n" )
-            flush( stdout )            
-        end
-    end
     
     function  inc_graph( bfactor, clean::Int = 0  )
         println( "Incremental graph construction (", bfactor, ")" )
@@ -1379,8 +1486,13 @@ function  test_nn_queries( env, m_i, m_q )
         end
     end
 
-    ####################################################################
-    ####################################################################
+    ##########################################################################
+    disk_ann_hop_compute( env, GG, m_i, n )
+    disk_ann_compute( env, GG, m_i, n )
+
+    # Generate and compute greedy permutation
+    I, D = greedy_permtuation( env, m_i, n, m_q )
+
     #greedy_graph( 1.1 )
     #greedy_graph( env, 1.6, 1 ) # Complete waste of time
     #greedy_graph( env, 2.0, 1 )
@@ -1400,32 +1512,7 @@ function  test_nn_queries( env, m_i, m_q )
     pgs_inc_graph_shortcut( 1.6, 3, true )
 
 #    inc_graph_shortcut( 2.0, 1, false )
-
-
-    ##########################################################################
-    println( "Computing DiskAnn..." )
-    flush( stdout )
-    @timeit T "DiskAnn" G_disk_ann = disk_ann_build_graph( env, MPointsSpace( m_i ) )
-    println( "Computing DiskAnn done..." )
-
-    description!( G_disk_ann, "DiskAnn(" * string( env.α )
-                              * "," * string( env.L )
-                * "," * string(env.Δ) )
-    push!( GG, G_disk_ann )
-    flush( stdout )
-
-    ##########################################################################
-    println( "Computing DiskAnnHope..." )
-    flush( stdout )
-    @timeit T "DiskAnnH" G_disk_ann_h = disk_ann_build_graph( env,
-        MPointsSpace( m_i, n ), true )
-    description!( G_disk_ann_h, "DiskAnnHOP(" * string( env.α )
-                              * "," * string( env.L )
-                * "," * string(env.Δ) )
-    push!( GG, G_disk_ann_h )
-    println( "     done..." )
-    flush( stdout )
-
+    
     #############################################################
 
     acc = query_testing_inner( env, GG, n, m_i, m_q )
@@ -1454,6 +1541,11 @@ function  test_nn_queries( env, m_i, m_q )
     return 0
 end
 
+# On SIFT1M parameters DiskANN paper used:
+# R=70
+# L=125
+# C=3000 (caching parameter?)
+# α = 2
 
 function  (@main)(args)
     println( "Starting..." )
@@ -1463,11 +1555,11 @@ function  (@main)(args)
     println( "Reading input" )
     flush( stdout )
     @timeit env.T "Reading input" begin
-        #m_i, m_q = input_random( 100, 10, 40 )
-        #m_i, m_q = input_random( 2000, 50, 20 )
+        m_i, m_q = input_random( env, 100, 10, 40 )
+        #m_i, m_q = input_random( env, 2000, 50, 20 )
         #m_i, m_q = input_sift_small()# # 25000, 1000, 8 )
-        #m_i, m_q = input_sift()# # 100,000, 1000, 8 )
-        m_i, m_q = input_deep1b( 500_000 )
+        #m_i, m_q = input_sift( env, 100 ) # # 1,000,000 points!
+        #m_i, m_q = input_deep1b( 500_000 )
     end
     println( "Reading done" )
     flush( stdout )
@@ -1485,16 +1577,23 @@ function  (@main)(args)
         exit( -1 )
     end
     println( "dim : ", dim )
-    println( "n   : ", n )
-    println( "n_q : ", n_q )
+    println( "n    : ", format(n, commas=true ) )
+    println( "n_Q  : ", format(n_q, commas=true ) )
     flush( stdout )
 
-    env.α = 1.4 
+    #env.α = 1.4 
+    env.α = 2.0
     env.β = 1.2 
-    env.L = 50
-    env.Δ = 10
-    env.Δ_clean = 4 * env.Δ 
-    env.ub_max_degree = env.Δ * 10
+    #env.R = 70   # "Max-degree" of the graph, more or less.
+
+    # R is "Max-degree" of the graph, more or less.
+#    env.R = min( round(Int, sqrt( n ) ), 70 )
+    env.R = min( round(Int, sqrt( n ) ), 10 )
+    env.L = round(Int, env.R + 40 )
+    #env.L = 125
+    #env.R = 10
+    env.R_clean = round(Int64, 1.3 * env.R )
+    env.ub_max_degree = env.R * 10
     env.init_graph = EmptyDiGraph
     env.n = n
     env.n_q = n_q
@@ -1506,9 +1605,9 @@ function  (@main)(args)
     dump( env )
 
     println( "-----------------------------------------------------" )
-    println( "dim : ", dim )
-    println( "n   : ", n )
-    println( "n_q : ", n_q )
+    println( "dim  : ", dim )
+    println( "n    : ", format(n, commas=true ) )
+    println( "n_Q  : ", format(n_q, commas=true ) )
     
     #show( env )
     #println( env )

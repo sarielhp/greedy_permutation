@@ -10,4 +10,6 @@ Pkg.add("Accessors")
 Pkg.add("SimpleWeightedGraphs")
 Pkg.add("TimerOutputs")
 Pkg.add("FileIO")
+Pkg.add("Format")
+Pkg.add( "JLD2" )
 
