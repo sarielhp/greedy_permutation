@@ -11,7 +11,6 @@ using Random
 using Accessors
 using DiGraphRW
 using JLD2
-#using PlotGraphviz
 
 #using SimpleWeightedGraphs
 
@@ -707,6 +706,7 @@ the i point in the greedy permutation).
 function nng_build_and_permut!(
     env::NEnv,
     m::PermutMetric{FMS},
+    base_name::String,
     factor::Float64 = 1.1,
     f_prune = false,
     f_shortcut = false,
@@ -715,6 +715,8 @@ function nng_build_and_permut!(
     n = env.n
     @assert( size( m ) == n ) 
     G = NNGraph( env, m, n, env.init_graph( n, env.ub_max_degree ) )
+
+    comp_graph_name( env, G, base_name )
 
     R = env.R
     R = fill( -1.0, n )
@@ -784,6 +786,8 @@ function nng_build_and_permut!(
         i += 1
     end
 
+    save_graph_and_permutation( env, G, m )
+    
     println( "c_count: ", c_count, " / ", i_iter )
     return  G, R
 end
@@ -893,7 +897,7 @@ function  load_input( env )
         flush( stdout )
         return  true, m_i, m_q
     end
-    return  false, Matrix{Float64}(), Matrix{Float64}()
+    return  false, zeros( 2, 2 ),zeros( 2, 2 )
 end
 
 function  save_input( env, m_i, m_q )
@@ -908,6 +912,7 @@ function  input_random( env, n, n_q, d )
     f_load, m_i, m_q = load_input( env )
     if  f_load
         println( "Loaded input..." )
+        @assert( ( size( m_i, 2 ) == n )  &&  ( size( m_i, 1 ) == d ) )
         return  m_i, m_q
     end
     m_i_, m_q_ = rand( d, n ), rand( d, n_q )
@@ -1126,7 +1131,7 @@ function  da_clean_inner( env, G, π::Vector{Int};
             U = Set{Int}( outneighbors( G.G, π[ i ] ) )
             robust_prune_vertex!( G, π[ i ], U, env.α, env.R )
         end =#
-        #XXX
+        
         _, cost, V, V_v_hop_val,_ =
            find_k_lowest_f_greedy( env, G.G, 1, L, j -> dist( G.m, j, π[i] ) )
 
@@ -1187,7 +1192,7 @@ function  clean_shortcut_vertex( env, G, v )
         x = opath[ i ][1]
         y = opath[ i + 1 ][1]
         
-        #println( x, " -> ", y ); #XXX
+        #println( x, " -> ", y ); 
         @assert( x < y )
         if  ( outdegree( G.G, x ) < env.ub_max_degree )
             add_edge!( G.G, x, y )
@@ -1218,22 +1223,48 @@ function  clean_shortcut( env, G, _n::Int = 0 )
 end
 
 
+function  comp_graph_name( env, G, baseD::String )
+    G.filename = env.saves_dir * env.input_name *"_n" * string(n)*
+                 "_" * baseD * "_R" * string(env.R) *
+                 "_L"*string(env.L) * ".bin"
+end
+
+function  load_graph( env, G, baseD::String )::Bool
+    comp_graph_name( env, G, baseD )
+    if  env.f_load  &&   isfile( G.filename )
+        G.G = graphRead( G.filename ) 
+        return true
+    end
+    return  false
+end
+
+function  save_graph( env, G )
+    if  ! env.f_save
+        return
+    end
+    println( "FILENAME: ", G.filename )
+    create_dir_from_file( G.filename )
+    graphWrite( G.filename, G.G )
+    #H = graphRead( G.filename );
+    
+    fln = G.filename*".jld2"
+    H = G.G
+    @save fln H
+end
+
+
 function  disk_ann_build_graph( env, m; f_hop_clean = false )
     n = size( m )
+    G = NNGraph( env, n, m, _G, "disk_ann", "" )
+    
+    hop_clean_str = f_hop_clean ? "_H_" : "_"
+    if  load_graph( env, G, "da" * hop_clean_str )
+        return  G
+    end
+
     println( "      Random graph..." )
     flush( stdout )
     @timeit env.T "Rand Graph" _G = generate_directed_random_graph( n, env.R )
-    G = NNGraph( env, n, m, _G, "disk_ann", "" )
-    hop_clean_str = f_hop_clean ? "_H_" : "_"
-    G.filename = env.saves_dir * "da" * hop_clean_str * env.input_name*"_n" *
-                  string(n)*"_R"*string(env.R) * ".bin"
-
-    if  env.f_load
-        if  isfile( G.filename )
-            G.G = graphRead( G.filename ) 
-            return
-        end
-    end
     
     println( "      Clean 1..." )
     flush( stdout )
@@ -1243,11 +1274,7 @@ function  disk_ann_build_graph( env, m; f_hop_clean = false )
     flush( stdout )
     @timeit env.T "Clean 2" da_clean( env, G; f_hop_clean=f_hop_clean )
 
-    if  env.f_save
-        create_dir_from_file( G.filename )
-        graphWrite( G.filename, G.G )
-        H = graphRead( G.filename )
-    end
+    save_graph( env, G )
     
     return  G
 end
@@ -1385,8 +1412,10 @@ end
 function  disk_ann_hop_compute( env, GG, m_i, n )
     println( "Computing DiskAnnHop..." )
     flush( stdout )
+    println( typeof( GG ) )
     @timeit env.T "DiskAnnH" G_disk_ann_h =
            disk_ann_build_graph( env, MPointsSpace( m_i, n ); f_hop_clean=true )
+    println( typeof( G_disk_ann_h ) )
 
     description!( G_disk_ann_h, "DiskAnnHOP(" * string( env.α )
                               * "," * string( env.L )
@@ -1416,7 +1445,7 @@ function  test_nn_queries( env, m_i, m_q )
         println( "Incremental graph construction (", bfactor, ")" )
         m_inc = PermutMetric(  MPointsSpace( m_i, n ) )
         str = "GInc " * string( bfactor )
-        @timeit T str  G, _ = nng_build_and_permut!( env, m_inc, bfactor )
+        @timeit T str  G, _ = nng_build_and_permut!( env, m_inc, str, bfactor )
         description!( G, str )
         push!( GG, G )
         flush( stdout )
@@ -1427,10 +1456,10 @@ function  test_nn_queries( env, m_i, m_q )
                                f_store_first = true )
         println( "Incremental prune graph construction (", bfactor, ")" )
         m_inc = PermutMetric( MPointsSpace( m_i, n ) )
-        str = "GInc P " * string( bfactor )
+        str = "GIncP" * string( bfactor )
         @timeit T str  begin
             @timeit T "building" G, _ = nng_build_and_permut!( env,
-                m_inc, bfactor, true )
+                m_inc, str, bfactor, true )
             description!( G, str )
             if  f_store_first 
                 push!( GG, G )
@@ -1449,17 +1478,19 @@ function  test_nn_queries( env, m_i, m_q )
               bstring( f_store_first ) * bstring( f_shortcut_inc ) *
               bstring( f_shortcut_clean )
         if  f_shortcut_inc
-            str = str * "[SC]"
+            str = str * "_SC"
         end
         if  f_shortcut_clean
-            str = str * "<C>"
+            str = str * "_X"
         end
-        
+
+        base_str = str 
         @timeit T str begin
             @timeit T "building" begin
                 G, _ = nng_build_and_permut!( env,
-                    m_inc, bfactor, false, f_shortcut_inc, f_shortcut_clean )
+                    m_inc, str, bfactor, false, f_shortcut_inc, f_shortcut_clean )
             end
+
             description!( G, str )
             if  f_store_first 
                 push!( GG, G )
@@ -1580,7 +1611,8 @@ function  (@main)(args)
     println( "n    : ", format(n, commas=true ) )
     println( "n_Q  : ", format(n_q, commas=true ) )
     flush( stdout )
-
+#    exit( -1 )
+    
     #env.α = 1.4 
     env.α = 2.0
     env.β = 1.2 
